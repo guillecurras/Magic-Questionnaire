@@ -24,4 +24,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile files('libs/wekaSTRIPPED.jar')
+    compile files('libs/WekatextToXml.jar')
+    compile files('libs/xercesImpl-2.9.0.jar')
+    compile files('libs/xerces-for-android.jar')
+    compile files('libs/xerces-for-android2.jar')
 }

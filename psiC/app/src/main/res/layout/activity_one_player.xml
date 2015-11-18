@@ -36,7 +36,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
-        android:onClick="yes"
+        android:onClick="handlerBotones"
         />
     <Button
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
-        android:onClick="no"
+        android:onClick="handlerBotones"
         />
     <Button
         android:layout_width="match_parent"
@@ -58,7 +58,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
-        android:onClick="maybe"
+        android:onClick="handlerBotones"
         />
 
 
@@ -71,7 +71,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
-        android:onClick="main"
+        android:onClick="handlerBotones"
         />
 
 </RelativeLayout>
