@@ -9,7 +9,7 @@ public class Parser {
 
     File arbolXML;
 
-    private int fase = 0;
+    private int fase = -1;
 
     public Parser() {
     }

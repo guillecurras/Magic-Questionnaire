@@ -27,6 +27,7 @@
         android:gravity="center"
         android:layout_marginTop="20dp"
         />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Maybe/NC"
-        android:id="@+id/one_maybe"
+        android:id="@+id/boton_maybe"
         android:layout_below="@+id/boton_not"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -62,16 +63,18 @@
         />
 
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Maybe/NC"
-        android:id="@+id/one_back"
-        android:layout_below="@+id/one_maybe"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="40dp"
-        android:onClick="handlerBotones"
-        />
+    <!--<Button-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="Maybe/NC"-->
+    <!--android:id="@+id/one_back"-->
+    <!--android:layout_below="@+id/one_maybe"-->
+    <!--android:layout_marginLeft="20dp"-->
+    <!--android:layout_marginRight="20dp"-->
+    <!--android:layout_marginTop="40dp"-->
+    <!--android:onClick="handlerBotones"-->
+    <!--/>-->
+
+    />
 
 </RelativeLayout>

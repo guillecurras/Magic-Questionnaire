@@ -12,14 +12,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
@@ -30,6 +26,9 @@ public class OnePlayer extends ActionBarActivity {
     String siguientePregunta = "";
     File arbol = null;
     static Parser parser = null;
+    TextView textViewPregunta;
+
+    ArrayList<Button> botones = new ArrayList<>();
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
@@ -37,19 +36,29 @@ public class OnePlayer extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         Log.d("CREATE", "Recibido-one");
         Intent intent = getIntent();
-        String message = intent.getStringExtra(Quiz.EXTRA_MESSAGE);
         setContentView(R.layout.activity_one_player);
         Log.d("CREATE", "Recojido-One");
-        TextView tv = (TextView) findViewById(R.id.texto_one_2);
-        tv.setText(message);
-        tv.setTextSize(40);
-        Log.d("CREATE", "Listo-One");
-
 
         arbol = obtenerArbol();
-
         if (parser == null)
             parser = new Parser(arbol);
+
+        textViewPregunta = (TextView) findViewById(R.id.texto_one_2);
+        siguientePregunta = parser.getSiguientePregunta("");
+        textViewPregunta.setText(siguientePregunta);
+        textViewPregunta.setTextSize(40);
+        Log.d("CREATE", "Listo-One");
+
+        Button boton1 = (Button) findViewById(R.id.boton_yes);
+        Button boton2 = (Button) findViewById(R.id.boton_not);
+        Button boton3 = (Button) findViewById(R.id.boton_maybe);
+
+        botones.add(boton1);
+        botones.add(boton2);
+        botones.add(boton3);
+
+
+
 
 
     }
@@ -66,10 +75,18 @@ public class OnePlayer extends ActionBarActivity {
     public void handlerBotones(View view)
     {
         Button boton = (Button) view;
-        Intent intent = new Intent(this,OnePlayer.class);
         siguientePregunta = parser.getSiguientePregunta(boton.getText().toString());
-        intent.putExtra(EXTRA_MESSAGE, siguientePregunta);
-        startActivity(intent);
+
+        if (!siguientePregunta.startsWith("#"))
+            textViewPregunta.setText(siguientePregunta);
+        else
+        {
+            textViewPregunta.setText("Estabas pensando en un: " + siguientePregunta.substring(1));
+            for (Button boton2 : botones)
+            {
+                boton2.setVisibility(View.GONE);
+            }
+        }
     }
 
 
