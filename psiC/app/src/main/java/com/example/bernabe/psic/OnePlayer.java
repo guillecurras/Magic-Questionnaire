@@ -1,7 +1,11 @@
 package com.example.bernabe.psic;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -17,33 +21,41 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
+
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 public class OnePlayer extends ActionBarActivity {
 
     /**
+     * Database path
+     */
+    private static final String DATABASE_PATH = "/data/data/com.example.bernabe.psic/databases/MAQ";
+
+    /**
      * @variable hQuestion All question cache
      */
-    private static Hashtable hQuestion;
+    private static Hashtable <String, Integer> hQuestion;
 
     /**
      * @variable hItem All item cache
      */
-    private static Hashtable hItem;
-
-    /**
-     * @variable ITEM The item key to hashtable hQuestion
-     */
-    private static final String ITEM = "item";
-
-    /**
-     * @variable hAnswer Table with each round's answers
-     */
-    Hashtable hAnswer;
+    private static Hashtable <String, Integer> hItem;
 
     /**
      * @variable roundNumber The round number of the actual game
      */
     private int roundNumber;
+
+    /**
+     * @variable hAnswer Table with each round's answers
+     */
+    private Hashtable hAnswer;
+
+    /**
+     * @variable Object to access to database utilities
+     */
+    private SQLUtil sqlUtil;
 
     public final static String EXTRA_MESSAGE = "com.bernabe.psic.MESSAGE";
 
@@ -57,16 +69,18 @@ public class OnePlayer extends ActionBarActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
 
-        SQLUtil sqlUtil = new SQLUtil();
-
         // Generating question and item cache
         try {
+            sqlUtil = new SQLUtil(DATABASE_PATH);
             hQuestion = sqlUtil.getAllQuestion();
             hItem = sqlUtil.getAllItem();
         } catch (Exception e) {
-            Log.e("ERROR_GENERATING_CACHE", e.getMessage());
+            Log.e("DB_ERROR", "ERROR_GENERATING_CACHE");
             e.printStackTrace();
         }
+
+        // Init answer's table
+        hAnswer = new Hashtable();
 
         super.onCreate(savedInstanceState);
         Log.d("CREATE", "Recibido-one");
@@ -112,18 +126,20 @@ public class OnePlayer extends ActionBarActivity {
 
         if (!nextQuestion.startsWith("#")) {
             questionTextView.setText(nextQuestion);
-            hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
+            if (hQuestion.containsKey(actualQuestion))
+                hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
         } else {
             questionTextView.setText("Estabas pensando en un: " + nextQuestion.substring(1));
-            hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
-            hAnswer.put(ITEM, hItem.get(nextQuestion.substring(1)));
-            // Insert round data in database
-            SQLUtil sqlUtil = new SQLUtil();
-            try {
-                sqlUtil.insertNewWekaData(hAnswer);
-            } catch (Exception e) {
-                Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
-                e.printStackTrace();
+            if (hQuestion.containsKey(actualQuestion) && hItem.containsKey(nextQuestion.substring(1))) {
+                hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
+                hAnswer.put("item", hItem.get(nextQuestion.substring(1)));
+
+                try {
+                    this.sqlUtil.insertNewWekaData(hAnswer);
+                } catch (Exception e) {
+                    Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
+                    e.printStackTrace();
+                }
             }
             for (Button boton2 : botones)
             {
