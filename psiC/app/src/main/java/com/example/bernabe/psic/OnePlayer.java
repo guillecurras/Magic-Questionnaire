@@ -1,9 +1,7 @@
 package com.example.bernabe.psic;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -18,20 +16,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class OnePlayer extends ActionBarActivity {
 
-    ArrayList weka = new ArrayList();
+    Vector vAnswer = new Vector();
     public final static String EXTRA_MESSAGE = "com.bernabe.psic.MESSAGE";
+
     String siguientePregunta = "";
     File arbol = null;
     static Parser parser = null;
     TextView textViewPregunta;
 
-    ArrayList<Button> botones = new ArrayList<>();
+    ArrayList<Button> botones = new ArrayList<Button>();
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("CREATE", "Recibido-one");
@@ -63,7 +61,6 @@ public class OnePlayer extends ActionBarActivity {
 
     }
 
-
 //        try {
 //            new WekaTextfileToXMLTextfile(getAssets().open("treeInText.txt"), getAssets().open("treeInXML.xml"));
 //        }
@@ -77,9 +74,10 @@ public class OnePlayer extends ActionBarActivity {
         Button boton = (Button) view;
         siguientePregunta = parser.getSiguientePregunta(boton.getText().toString());
 
-        if (!siguientePregunta.startsWith("#"))
+        if (!siguientePregunta.startsWith("#")) {
+            vAnswer.add(boton.getText());
             textViewPregunta.setText(siguientePregunta);
-        else
+        } else
         {
             textViewPregunta.setText("Estabas pensando en un: " + siguientePregunta.substring(1));
             for (Button boton2 : botones)
