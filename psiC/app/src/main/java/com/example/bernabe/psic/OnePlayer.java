@@ -16,35 +16,72 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Vector;
+import java.util.Hashtable;
 
 public class OnePlayer extends ActionBarActivity {
 
-    Vector vAnswer = new Vector();
+    /**
+     * @variable hQuestion All question cache
+     */
+    private static Hashtable hQuestion;
+
+    /**
+     * @variable hItem All item cache
+     */
+    private static Hashtable hItem;
+
+    /**
+     * @variable ITEM The item key to hashtable hQuestion
+     */
+    private static final String ITEM = "item";
+
+    /**
+     * @variable hAnswer Table with each round's answers
+     */
+    Hashtable hAnswer;
+
+    /**
+     * @variable roundNumber The round number of the actual game
+     */
+    private int roundNumber;
+
     public final static String EXTRA_MESSAGE = "com.bernabe.psic.MESSAGE";
 
-    String siguientePregunta = "";
-    File arbol = null;
+    String nextQuestion = "";
+
+    File tree = null;
     static Parser parser = null;
-    TextView textViewPregunta;
+    TextView questionTextView;
 
     ArrayList<Button> botones = new ArrayList<Button>();
 
     protected void onCreate(Bundle savedInstanceState) {
+
+        SQLUtil sqlUtil = new SQLUtil();
+
+        // Generating question and item cache
+        try {
+            hQuestion = sqlUtil.getAllQuestion();
+            hItem = sqlUtil.getAllItem();
+        } catch (Exception e) {
+            Log.e("ERROR_GENERATING_CACHE", e.getMessage());
+            e.printStackTrace();
+        }
+
         super.onCreate(savedInstanceState);
         Log.d("CREATE", "Recibido-one");
         Intent intent = getIntent();
         setContentView(R.layout.activity_one_player);
         Log.d("CREATE", "Recojido-One");
 
-        arbol = obtenerArbol();
+        tree = obtenerArbol();
         if (parser == null)
-            parser = new Parser(arbol);
+            parser = new Parser(tree);
 
-        textViewPregunta = (TextView) findViewById(R.id.texto_one_2);
-        siguientePregunta = parser.getSiguientePregunta("");
-        textViewPregunta.setText(siguientePregunta);
-        textViewPregunta.setTextSize(40);
+        questionTextView = (TextView) findViewById(R.id.texto_one_2);
+        nextQuestion = parser.getSiguientePregunta("");
+        questionTextView.setText(nextQuestion);
+        questionTextView.setTextSize(40);
         Log.d("CREATE", "Listo-One");
 
         Button boton1 = (Button) findViewById(R.id.boton_yes);
@@ -55,11 +92,8 @@ public class OnePlayer extends ActionBarActivity {
         botones.add(boton2);
         botones.add(boton3);
 
-
-
-
-
     }
+
 
 //        try {
 //            new WekaTextfileToXMLTextfile(getAssets().open("treeInText.txt"), getAssets().open("treeInXML.xml"));
@@ -69,17 +103,28 @@ public class OnePlayer extends ActionBarActivity {
 //
 //        }
 
+
     public void handlerBotones(View view)
     {
         Button boton = (Button) view;
-        siguientePregunta = parser.getSiguientePregunta(boton.getText().toString());
+        String actualQuestion = nextQuestion;
+        nextQuestion = parser.getSiguientePregunta(boton.getText().toString());
 
-        if (!siguientePregunta.startsWith("#")) {
-            vAnswer.add(boton.getText());
-            textViewPregunta.setText(siguientePregunta);
-        } else
-        {
-            textViewPregunta.setText("Estabas pensando en un: " + siguientePregunta.substring(1));
+        if (!nextQuestion.startsWith("#")) {
+            questionTextView.setText(nextQuestion);
+            hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
+        } else {
+            questionTextView.setText("Estabas pensando en un: " + nextQuestion.substring(1));
+            hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
+            hAnswer.put(ITEM, hItem.get(nextQuestion.substring(1)));
+            // Insert round data in database
+            SQLUtil sqlUtil = new SQLUtil();
+            try {
+                sqlUtil.insertNewWekaData(hAnswer);
+            } catch (Exception e) {
+                Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
+                e.printStackTrace();
+            }
             for (Button boton2 : botones)
             {
                 boton2.setVisibility(View.GONE);
