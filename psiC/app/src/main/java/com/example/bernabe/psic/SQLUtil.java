@@ -1,79 +1,75 @@
 package com.example.bernabe.psic;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import weka.experiment.InstanceQuery;
+
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 /**
  * This is a class that contains several methods to interact with a sqlite database using Weka
  *
  * @author  David Antolin Alvarez
- * @version 0.1
+ * @version 0.1.1
  */
 
 public class SQLUtil {
 
-    /**
-     * The user we insert when we don't want to specify any user
-     */
-    public static final String NO_USER = "nobody";
-    /**
-     * The password we insert when we don't want to specify any user
-     */
-    public static final String NO_USER_PWD = "";
-    /**
-     * The JDBC class used to connect to SQLite Database
-     */
-    public static final String SQLITE_CLASS = "org.sqlite.JDBC";
+    /* Table question variables */
+    private static final String TABLE_QUESTION = "question";
+
+    private static final String COLUMN_QUESTION_ID = "questionId";
+
+    private static final String COLUMN_QUESTION = "question";
+
+    /* Table item variables */
+    private static final String TABLE_ITEM = "item";
+
+    private static final String COLUMN_ITEM_ID = "itemId";
+
+    private static final String COLUMN_ITEM = "item";
+
+    /* Table answer variables */
+    private static final String TABLE_ANSWER = "answer";
+
+    private static final String COLUMN_ROUND_NUMBER = "roundNumber";
+
+    private static final String COLUMN_ANSWER_ID = "answerId";
+
+    private static final String COLUMN_ANSWER_DESCRIPTION = "answerDescription";
 
     /**
-     * The item key
+     * The path to the database used in the application
      */
-    public static final String ITEM = "item";
-    /**
-     * Query sentence for find all items
-     */
-    public static final String Q_ALL_ITEM = "SELECT * FROM item";
-    /**
-     * Query sentence for find all questions
-     */
-    public static final String Q_ALL_QUESTION = "SELECT * FROM question";
+    private String databasePath = null;
 
     /**
-     * It gives a query string, returns the InstanceQuery object asociate to that query.
-     * @param sQuery The
-     * @return jdbcConnection
+     * SQLite database object to realize class operations
      */
+    private static SQLiteDatabase sqliteDatabase = null;
 
-    public InstanceQuery getUnidentifiedInstanceQuery (String sQuery) throws Exception {
-        InstanceQuery query = new InstanceQuery();
+    public SQLUtil () {}
 
-        query.setUsername(NO_USER);
-        query.setPassword(NO_USER_PWD);
-        query.setQuery(sQuery);
-
-        return query;
+    public SQLUtil (String databasePath) throws Exception{
+        this.databasePath = databasePath;
     }
 
     /**
-     * It gives a database path for a sqlite database, returns a connection for that database.
+     * Given a database path for a sqlite database, returns a connection for that database.
      * @param databasePath The path of the sqlite's database path
      * @return jdbcConnection The jdbc connection to the specified sqlite database
      */
 
-    public Connection getSqliteConnection (String databasePath) throws Exception {
+    private SQLiteDatabase getSQLiteDatabase(String databasePath) throws Exception {
 
-        Connection jdbcConnection = null;
-
-        Class.forName(SQLITE_CLASS);
-        jdbcConnection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
-
-        return jdbcConnection;
+        return openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE);
 
     }
 
@@ -86,27 +82,26 @@ public class SQLUtil {
     public String generateWekaInput (int roundNumber) throws Exception {
         String sWekaInput = new String();
 
-        // Create the connection to the database
-        Connection dbConnection = null;
-        PreparedStatement sqlStatement = null;
-
         // Query sentence for find all the pairs answer-question
-        String answersQuery = "SELECT roundAnswers.answerDescription, item.item "
-                + "FROM question LEFT OUTER JOIN "
-                + "(SELECT * FROM answer WHERE roundNumber = ?) AS roundAnswers ON question.questionId = roundAnswers.questionId LEFT OUTER JOIN "
-                + "item ON roundAnswers.itemId = item.itemId";
+        String answersQuery = "SELECT roundAnswers." + COLUMN_ANSWER_DESCRIPTION + ", " + TABLE_ITEM + "." + COLUMN_ITEM
+                + " FROM " + TABLE_QUESTION + " LEFT OUTER JOIN "
+                + "(SELECT * FROM " + TABLE_ANSWER + " WHERE " + COLUMN_ROUND_NUMBER + " = ?) AS roundAnswers ON "
+                + TABLE_QUESTION + "." + COLUMN_QUESTION_ID + " = roundAnswers." + COLUMN_QUESTION_ID + " LEFT OUTER JOIN "
+                + TABLE_ITEM + " ON roundAnswers." + COLUMN_ITEM_ID + " = " + TABLE_ITEM + "." + COLUMN_ITEM_ID;
 
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
 
+        String [] queryArgs = new String [1];
         try {
-            dbConnection = getSqliteConnection("BDD/MAQ");
-            sqlStatement = dbConnection.prepareStatement(answersQuery); // Prepare the query
-            sqlStatement.setInt(1, roundNumber); // Set the query filter
-            ResultSet answersQueryResult = sqlStatement.executeQuery();
+            queryArgs[0] = String.valueOf(roundNumber); // Set the query filter
+            Cursor queryResult = this.sqliteDatabase.rawQuery(answersQuery, queryArgs);
             String newItem = null;
-            while (answersQueryResult.next()) {
+            for (int i = 0; i< queryResult.getCount(); i++) {
+                queryResult.moveToPosition(i);
                 if (newItem == null) // Obtain the item found in that round
-                    newItem = answersQueryResult.getString("item");
-                String newAnswer = answersQueryResult.getString("answerDescription");
+                    newItem = queryResult.getString(queryResult.getColumnIndex(COLUMN_ITEM));
+                String newAnswer = queryResult.getString(queryResult.getColumnIndex(COLUMN_ANSWER_DESCRIPTION));
                 if (newAnswer == null) // Creating the output with the answers
                     sWekaInput += ",";
                 else if (!newAnswer.contains(" "))
@@ -122,7 +117,7 @@ public class SQLUtil {
             throw new Exception("M_ERROR_GENERATING_WEKA_INPUT " + e.getMessage());
         } finally {
             try {
-                dbConnection.close();
+                this.sqliteDatabase.close();
             } catch (Exception e) {
                 throw new Exception("M_ERROR_GENERATING_WEKA_INPUT " + e.getMessage());
             }
@@ -136,29 +131,27 @@ public class SQLUtil {
      * @return vRounds A vector with all rounds stored in the database
      * @throws Exception
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+
     public Vector getAllRounds () throws Exception {
         Vector vRounds = new Vector();
 
         // Query used to obtain all rounds stored in database
-        final String Q_ALL_ROUNDS = "SELECT roundNumber FROM answer GROUP BY roundNumber";
+        String sQueryAllRounds = "SELECT " + COLUMN_ROUND_NUMBER + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
 
-        // Create the connection to the database
-        Connection dbConnection = null;
-        PreparedStatement sqlStatement = null;
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
 
         try {
-            dbConnection = getSqliteConnection("BDD/MAQ");
-            sqlStatement = dbConnection.prepareStatement(Q_ALL_ROUNDS); // Prepare the query
-            ResultSet roundsQueryResult = sqlStatement.executeQuery();
-            while (roundsQueryResult.next()) { // Inserting each round in the round's vector
-                vRounds.add(roundsQueryResult.getInt("roundNumber"));
+            Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllRounds, null);
+            for (int i = 0; i< queryResult.getCount(); i++) { // Inserting each round in the round's vector
+                queryResult.moveToPosition(i);
+                vRounds.add(queryResult.getInt(queryResult.getColumnIndex(COLUMN_ROUND_NUMBER)));
             }
         } catch (Exception e){
             throw new Exception("M_ERROR_GETTING_ROUNDS " + e.getMessage());
         } finally {
             try {
-                dbConnection.close();
+                this.sqliteDatabase.close();
             } catch (Exception e) {
                 throw new Exception("M_ERROR_GETTING_ROUNDS " + e.getMessage());
             }
@@ -176,26 +169,23 @@ public class SQLUtil {
 
         int newRoundNumber = -1;
 
-        // Query used to obtain all rounds stored in database
-        final String Q_ALL_ROUNDS = "SELECT MAX(roundNumber) AS roundNumber FROM answer GROUP BY roundNumber";
+        // Query used to obtain the maximum roundNumber stored in DB
+        String sQueryMaxRound = "SELECT MAX(" + COLUMN_ROUND_NUMBER + ") AS " + COLUMN_ROUND_NUMBER
+                + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
 
-        // Create the connection to the database
-        Connection dbConnection = null;
-        PreparedStatement sqlStatement = null;
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
 
         int maxRoundNumber = 0;
         try {
-            dbConnection = getSqliteConnection("BDD/MAQ");
-            sqlStatement = dbConnection.prepareStatement(Q_ALL_ROUNDS); // Prepare the query
-            ResultSet roundsQueryResult = sqlStatement.executeQuery();
-            while (roundsQueryResult.next()) { // Inserting each round in the round's vector
-                maxRoundNumber = roundsQueryResult.getInt("roundNumber");
-            }
+            Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryMaxRound, null);
+            queryResult.moveToFirst();
+            maxRoundNumber = queryResult.getInt(queryResult.getColumnIndex(COLUMN_ROUND_NUMBER));
         } catch (Exception e){
             throw new Exception("M_ERROR_GETTING_NEW_ROUND " + e.getMessage());
         } finally {
             try {
-                dbConnection.close();
+                sqliteDatabase.close();
             } catch (Exception e) {
                 throw new Exception("M_ERROR_GETTING_NEW_ROUND " + e.getMessage());
             }
@@ -213,26 +203,26 @@ public class SQLUtil {
      * @return hQuestions where key = question, value = questionId
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
+
     public Hashtable getAllQuestion () throws Exception {
         Hashtable hQuestion = new Hashtable();
 
-        // Create the connection to the database
-        Connection dbConnection = null;
-        PreparedStatement sqlStatement = null;
+        String sQueryAllItem = "SELECT * FROM " + TABLE_QUESTION;
+
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
 
         try {
-            dbConnection = getSqliteConnection("BDD/MAQ");
-            sqlStatement = dbConnection.prepareStatement(Q_ALL_QUESTION); // Prepare the query
-            ResultSet roundsQueryResult = sqlStatement.executeQuery();
-            while (roundsQueryResult.next()) { // Inserting each round in the round's vector
-                hQuestion.put(roundsQueryResult.getString("question"), roundsQueryResult.getInt("questionId"));
+            Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
+            for (int i = 0; i< queryResult.getCount(); i++) { // Inserting each round in the question's vector
+                queryResult.moveToPosition(i);
+                hQuestion.put(queryResult.getString(queryResult.getColumnIndex(COLUMN_QUESTION)), queryResult.getInt(queryResult.getColumnIndex(COLUMN_QUESTION_ID)));
             }
         } catch (Exception e){
             throw new Exception("M_ERROR_GETTING_QUESTIONS " + e.getMessage());
         } finally {
             try {
-                dbConnection.close();
+                this.sqliteDatabase.close();
             } catch (Exception e) {
                 throw new Exception("M_ERROR_GETTING_QUESTIONS " + e.getMessage());
             }
@@ -246,26 +236,26 @@ public class SQLUtil {
      * @return hQuestions where key = question, value = questionId
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
+
     public Hashtable getAllItem () throws Exception {
         Hashtable hItem = new Hashtable();
 
-        // Create the connection to the database
-        Connection dbConnection = null;
-        PreparedStatement sqlStatement = null;
+        String sQueryAllItem = "SELECT * FROM " + TABLE_ITEM;
+
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
 
         try {
-            dbConnection = getSqliteConnection("BDD/MAQ");
-            sqlStatement = dbConnection.prepareStatement(Q_ALL_ITEM); // Prepare the query
-            ResultSet roundsQueryResult = sqlStatement.executeQuery();
-            while (roundsQueryResult.next()) { // Inserting each round in the round's vector
-                hItem.put(roundsQueryResult.getString("item"), roundsQueryResult.getInt("itemId"));
+            Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
+            for (int i = 0; i< queryResult.getCount(); i++) { // Inserting each item in the item's vector
+                queryResult.moveToPosition(i);
+                hItem.put(queryResult.getString(queryResult.getColumnIndex(COLUMN_ITEM)), queryResult.getInt(queryResult.getColumnIndex(COLUMN_ITEM_ID)));
             }
         } catch (Exception e){
             throw new Exception("M_ERROR_GETTING_ITEMS " + e.getMessage());
         } finally {
             try {
-                dbConnection.close();
+                this.sqliteDatabase.close();
             } catch (Exception e) {
                 throw new Exception("M_ERROR_GETTING_ITEMS " + e.getMessage());
             }
@@ -284,39 +274,33 @@ public class SQLUtil {
         int newRoundNumber = this.getNewRoundNumber();
         if (newRoundNumber > 0) {
 
-            // Insert sentence to answer table
-            String sInsertSentence = "INSERT INTO answer (roundNumber, itemId, questionId, answerDescription) "
-                    + "VALUES (?, ?, ?, ?)";
-
-            // Create the connection to the database
-            Connection dbConnection = null;
-            PreparedStatement sqlStatement = null;
+            if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+                sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
 
             try {
-                int itemId = (int) hWekaData.get(ITEM); // Get the itemId from the input table
-                dbConnection = getSqliteConnection("BDD/MAQ");
+                int itemId = (int) hWekaData.get(COLUMN_ITEM); // Get the itemId from the input table
                 // Init the transaction to add data all together
-                dbConnection.setAutoCommit(false);
-                sqlStatement = dbConnection.prepareStatement(sInsertSentence); // Prepare the query
-                // Setting the insert values
-                sqlStatement.setInt(1, newRoundNumber);
-                sqlStatement.setInt(2, itemId);
-
+                sqliteDatabase.beginTransaction();
                 Enumeration dataKeys = hWekaData.keys();
+                ContentValues cValuesInsert;
                 while (dataKeys.hasMoreElements()) { // Insert a new row in answer table for each answer in table
                     int questionId = (int) dataKeys.nextElement();
                     String sAnswerDescription = (String) hWekaData.get(questionId);
-                    sqlStatement.setInt(3, (int) questionId);
-                    sqlStatement.setString(4, sAnswerDescription);
-                    sqlStatement.executeQuery();
+                    cValuesInsert = new ContentValues();
+                    cValuesInsert.put(COLUMN_ROUND_NUMBER, newRoundNumber);
+                    cValuesInsert.put(COLUMN_ITEM_ID, itemId);
+                    cValuesInsert.put(COLUMN_QUESTION_ID, questionId);
+                    cValuesInsert.put(COLUMN_ANSWER_DESCRIPTION, sAnswerDescription);
+                    sqliteDatabase.insert(TABLE_ANSWER, null, cValuesInsert);
                 }
-                dbConnection.commit();
+                this.sqliteDatabase.setTransactionSuccessful();
+                this.sqliteDatabase.endTransaction();
             } catch (Exception e) {
-                dbConnection.rollback();
+                this.sqliteDatabase.endTransaction();
                 throw new Exception("M_ERROR_INSERTING_WEKA_DATA_IN_DATABASE " + e.getMessage());
             } finally {
                 try {
-                    dbConnection.close();
+                    sqliteDatabase.close();
                 } catch (Exception e) {
                     throw new Exception("M_ERROR_INSERTING_WEKA_DATA_IN_DATABASE " + e.getMessage());
                 }
