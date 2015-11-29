@@ -4,9 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -17,7 +14,7 @@ import static android.database.sqlite.SQLiteDatabase.openDatabase;
  * This is a class that contains several methods to interact with a sqlite database using Weka
  *
  * @author  David Antolin Alvarez
- * @version 0.1.1
+ * @version 0.1.2
  */
 
 public class SQLUtil {
@@ -67,9 +64,17 @@ public class SQLUtil {
      * @return jdbcConnection The jdbc connection to the specified sqlite database
      */
 
-    private SQLiteDatabase getSQLiteDatabase(String databasePath) throws Exception {
+    private SQLiteDatabase openSQLiteDatabase(String databasePath, int openMode) throws Exception {
+        SQLiteDatabase sqLiteDatabase;
 
-        return openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE);
+        if (openMode == SQLiteDatabase.OPEN_READONLY)
+            sqLiteDatabase = openDatabase(databasePath, null, SQLiteDatabase.OPEN_READONLY);
+        else if (openMode == SQLiteDatabase.OPEN_READWRITE)
+            sqLiteDatabase = openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE);
+        else
+            sqLiteDatabase = openDatabase(databasePath, null, SQLiteDatabase.OPEN_READONLY);
+
+        return sqLiteDatabase;
 
     }
 
@@ -89,8 +94,12 @@ public class SQLUtil {
                 + TABLE_QUESTION + "." + COLUMN_QUESTION_ID + " = roundAnswers." + COLUMN_QUESTION_ID + " LEFT OUTER JOIN "
                 + TABLE_ITEM + " ON roundAnswers." + COLUMN_ITEM_ID + " = " + TABLE_ITEM + "." + COLUMN_ITEM_ID;
 
-        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()){
+            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+        } else if (this.sqliteDatabase.isReadOnly()) {
+            this.sqliteDatabase.close();
+            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+        }
 
         String [] queryArgs = new String [1];
         try {
@@ -139,7 +148,7 @@ public class SQLUtil {
         String sQueryAllRounds = "SELECT " + COLUMN_ROUND_NUMBER + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
+            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
 
         try {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllRounds, null);
@@ -174,7 +183,7 @@ public class SQLUtil {
                 + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
+            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
 
         int maxRoundNumber = 0;
         try {
@@ -185,7 +194,7 @@ public class SQLUtil {
             throw new Exception("M_ERROR_GETTING_NEW_ROUND " + e.getMessage());
         } finally {
             try {
-                sqliteDatabase.close();
+                this.sqliteDatabase.close();
             } catch (Exception e) {
                 throw new Exception("M_ERROR_GETTING_NEW_ROUND " + e.getMessage());
             }
@@ -210,7 +219,7 @@ public class SQLUtil {
         String sQueryAllItem = "SELECT * FROM " + TABLE_QUESTION;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
+            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
 
         try {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
@@ -243,7 +252,7 @@ public class SQLUtil {
         String sQueryAllItem = "SELECT * FROM " + TABLE_ITEM;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
+            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
 
         try {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
@@ -274,13 +283,17 @@ public class SQLUtil {
         int newRoundNumber = this.getNewRoundNumber();
         if (newRoundNumber > 0) {
 
-            if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-                sqliteDatabase = this.getSQLiteDatabase(this.databasePath);
+            if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()){
+                this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+            } else if (this.sqliteDatabase.isReadOnly()) {
+                this.sqliteDatabase.close();
+                this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+            }
 
             try {
                 int itemId = (int) hWekaData.get(COLUMN_ITEM); // Get the itemId from the input table
                 // Init the transaction to add data all together
-                sqliteDatabase.beginTransaction();
+                this.sqliteDatabase.beginTransaction();
                 Enumeration dataKeys = hWekaData.keys();
                 ContentValues cValuesInsert;
                 while (dataKeys.hasMoreElements()) { // Insert a new row in answer table for each answer in table
@@ -291,7 +304,7 @@ public class SQLUtil {
                     cValuesInsert.put(COLUMN_ITEM_ID, itemId);
                     cValuesInsert.put(COLUMN_QUESTION_ID, questionId);
                     cValuesInsert.put(COLUMN_ANSWER_DESCRIPTION, sAnswerDescription);
-                    sqliteDatabase.insert(TABLE_ANSWER, null, cValuesInsert);
+                    this.sqliteDatabase.insert(TABLE_ANSWER, null, cValuesInsert);
                 }
                 this.sqliteDatabase.setTransactionSuccessful();
                 this.sqliteDatabase.endTransaction();
@@ -300,7 +313,7 @@ public class SQLUtil {
                 throw new Exception("M_ERROR_INSERTING_WEKA_DATA_IN_DATABASE " + e.getMessage());
             } finally {
                 try {
-                    sqliteDatabase.close();
+                    this.sqliteDatabase.close();
                 } catch (Exception e) {
                     throw new Exception("M_ERROR_INSERTING_WEKA_DATA_IN_DATABASE " + e.getMessage());
                 }
