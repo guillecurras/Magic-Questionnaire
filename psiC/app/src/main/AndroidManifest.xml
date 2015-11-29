@@ -17,7 +17,7 @@
         </activity>
         <activity
             android:name=".OnePlayer"
-            android:label="@string/title_activity_one_player" >
+            android:label="@string/title_activity_one_player">
         </activity>
         <activity
             android:name=".Two_player"

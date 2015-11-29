@@ -108,7 +108,6 @@ public class OnePlayer extends ActionBarActivity {
 
     }
 
-
 //        try {
 //            new WekaTextfileToXMLTextfile(getAssets().open("treeInText.txt"), getAssets().open("treeInXML.xml"));
 //        }
@@ -126,11 +125,12 @@ public class OnePlayer extends ActionBarActivity {
 
         if (!nextQuestion.startsWith("#")) {
             questionTextView.setText(nextQuestion);
-            if (hQuestion.containsKey(actualQuestion))
+            if (hQuestion != null && hQuestion.containsKey(actualQuestion))
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
         } else {
             questionTextView.setText("Estabas pensando en un: " + nextQuestion.substring(1));
-            if (hQuestion.containsKey(actualQuestion) && hItem.containsKey(nextQuestion.substring(1))) {
+            if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
+                    && hItem.containsKey(nextQuestion.substring(1))) {
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
                 hAnswer.put("item", hItem.get(nextQuestion.substring(1)));
 
