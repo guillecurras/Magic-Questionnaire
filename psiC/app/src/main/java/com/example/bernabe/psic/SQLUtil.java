@@ -1,6 +1,7 @@
 package com.example.bernabe.psic;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -14,22 +15,22 @@ import static android.database.sqlite.SQLiteDatabase.openDatabase;
  * This is a class that contains several methods to interact with a sqlite database using Weka
  *
  * @author  David Antolin Alvarez
- * @version 0.1.2
+ * @version 0.3.1
  */
 
-public class SQLUtil {
+public class SQLUtil extends PreloadedDatabaseHelper {
 
     /* Table question variables */
     private static final String TABLE_QUESTION = "question";
 
-    private static final String COLUMN_QUESTION_ID = "questionId";
+    private static final String COLUMN_QUESTION_ID = "_id";
 
     private static final String COLUMN_QUESTION = "question";
 
     /* Table item variables */
     private static final String TABLE_ITEM = "item";
 
-    private static final String COLUMN_ITEM_ID = "itemId";
+    private static final String COLUMN_ITEM_ID = "_id";
 
     private static final String COLUMN_ITEM = "item";
 
@@ -38,41 +39,48 @@ public class SQLUtil {
 
     private static final String COLUMN_ROUND_NUMBER = "roundNumber";
 
-    private static final String COLUMN_ANSWER_ID = "answerId";
+    private static final String COLUMN_ANSWER_ID = "_id";
 
     private static final String COLUMN_ANSWER_DESCRIPTION = "answerDescription";
 
     /**
-     * The path to the database used in the application
+     * The path to the database used
      */
-    private String databasePath = null;
+    private String DB_PATH = null;
+
+    /**
+     * The name of the database used
+     */
+    private String DB_NAME = null;
 
     /**
      * SQLite database object to realize class operations
      */
     private static SQLiteDatabase sqliteDatabase = null;
 
-    public SQLUtil () {}
 
-    public SQLUtil (String databasePath) throws Exception{
-        this.databasePath = databasePath;
+    public SQLUtil (Context context, String DB_PATH, String DB_NAME) throws Exception{
+        super (context, DB_PATH, DB_NAME);
+        this.DB_PATH = DB_PATH;
+        this.DB_NAME = DB_NAME;
+        super.createDataBase();
     }
 
     /**
      * Given a database path for a sqlite database, returns a connection for that database.
-     * @param databasePath The path of the sqlite's database path
+     * @param databaseQualifiedName The path of the sqlite's database path
      * @return jdbcConnection The jdbc connection to the specified sqlite database
      */
 
-    private SQLiteDatabase openSQLiteDatabase(String databasePath, int openMode) throws Exception {
+    private SQLiteDatabase openSQLiteDatabase(String databaseQualifiedName, int openMode) throws Exception {
         SQLiteDatabase sqLiteDatabase;
 
-        if (openMode == SQLiteDatabase.OPEN_READONLY)
-            sqLiteDatabase = openDatabase(databasePath, null, SQLiteDatabase.OPEN_READONLY);
-        else if (openMode == SQLiteDatabase.OPEN_READWRITE)
-            sqLiteDatabase = openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE);
+        if (openMode == SQLiteDatabase.OPEN_READONLY) {
+            sqLiteDatabase = openDatabase(databaseQualifiedName, null, SQLiteDatabase.OPEN_READONLY);
+        } else if (openMode == SQLiteDatabase.OPEN_READWRITE)
+            sqLiteDatabase = openDatabase(databaseQualifiedName, null, SQLiteDatabase.OPEN_READWRITE);
         else
-            sqLiteDatabase = openDatabase(databasePath, null, SQLiteDatabase.OPEN_READONLY);
+            sqLiteDatabase = openDatabase(databaseQualifiedName, null, SQLiteDatabase.OPEN_READONLY);
 
         return sqLiteDatabase;
 
@@ -95,10 +103,10 @@ public class SQLUtil {
                 + TABLE_ITEM + " ON roundAnswers." + COLUMN_ITEM_ID + " = " + TABLE_ITEM + "." + COLUMN_ITEM_ID;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()){
-            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
         } else if (this.sqliteDatabase.isReadOnly()) {
             this.sqliteDatabase.close();
-            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
         }
 
         String [] queryArgs = new String [1];
@@ -148,7 +156,7 @@ public class SQLUtil {
         String sQueryAllRounds = "SELECT " + COLUMN_ROUND_NUMBER + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READONLY);
 
         try {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllRounds, null);
@@ -183,7 +191,7 @@ public class SQLUtil {
                 + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READONLY);
 
         int maxRoundNumber = 0;
         try {
@@ -219,7 +227,7 @@ public class SQLUtil {
         String sQueryAllItem = "SELECT * FROM " + TABLE_QUESTION;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READONLY);
 
         try {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
@@ -252,7 +260,7 @@ public class SQLUtil {
         String sQueryAllItem = "SELECT * FROM " + TABLE_ITEM;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
-            this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READONLY);
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READONLY);
 
         try {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
@@ -284,10 +292,10 @@ public class SQLUtil {
         if (newRoundNumber > 0) {
 
             if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()){
-                this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+                this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
             } else if (this.sqliteDatabase.isReadOnly()) {
                 this.sqliteDatabase.close();
-                this.sqliteDatabase = this.openSQLiteDatabase(this.databasePath, SQLiteDatabase.OPEN_READWRITE);
+                this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
             }
 
             try {
