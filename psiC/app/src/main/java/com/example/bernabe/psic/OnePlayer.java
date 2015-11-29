@@ -67,14 +67,7 @@ public class OnePlayer extends ActionBarActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
 
-        // Generating question and item cache
-        try {
-            sqlUtil = new SQLUtil(this, this.DB_PATH, this.DB_NAME);
-            hQuestion = sqlUtil.getAllQuestion();
-            hItem = sqlUtil.getAllItem();
-        } catch (Exception e) {
-            Log.e("DB_ERROR", e.getMessage());
-        }
+        this.initCache();
 
         // Init answer's table
         hAnswer = new Hashtable();
@@ -104,7 +97,6 @@ public class OnePlayer extends ActionBarActivity {
         botones.add(boton3);
 
     }
-
 //        try {
 //            new WekaTextfileToXMLTextfile(getAssets().open("treeInText.txt"), getAssets().open("treeInXML.xml"));
 //        }
@@ -202,4 +194,17 @@ public class OnePlayer extends ActionBarActivity {
             out.write(buffer, 0, read);
         }
     }
+
+
+    public void initCache () {
+        // Generating question and item cache
+        try {
+            sqlUtil = new SQLUtil(this, this.DB_PATH, this.DB_NAME);
+            hQuestion = sqlUtil.getAllQuestion();
+            hItem = sqlUtil.getAllItem();
+        } catch (Exception e) {
+            Log.e("DB_ERROR", e.getMessage());
+        }
+    }
+
 }
