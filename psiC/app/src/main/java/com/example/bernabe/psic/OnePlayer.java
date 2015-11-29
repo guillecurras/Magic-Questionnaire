@@ -1,18 +1,13 @@
 package com.example.bernabe.psic;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Path;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,16 +16,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
-import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 public class OnePlayer extends ActionBarActivity {
 
     /**
      * Database path
      */
-    private static final String DATABASE_PATH = "/data/data/com.example.bernabe.psic/databases/MAQ";
+    private static final String DB_PATH = "/data/data/com.example.bernabe.psic/databases/";
+
+    /**
+     * Database path
+     */
+    private static final String DB_NAME = "MAQ";
 
     /**
      * @variable hQuestion All question cache
@@ -71,12 +69,11 @@ public class OnePlayer extends ActionBarActivity {
 
         // Generating question and item cache
         try {
-            sqlUtil = new SQLUtil(DATABASE_PATH);
+            sqlUtil = new SQLUtil(this, this.DB_PATH, this.DB_NAME);
             hQuestion = sqlUtil.getAllQuestion();
             hItem = sqlUtil.getAllItem();
         } catch (Exception e) {
-            Log.e("DB_ERROR", "ERROR_GENERATING_CACHE");
-            e.printStackTrace();
+            Log.e("DB_ERROR", e.getMessage());
         }
 
         // Init answer's table
