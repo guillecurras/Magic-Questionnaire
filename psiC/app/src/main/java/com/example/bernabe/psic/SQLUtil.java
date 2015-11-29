@@ -44,16 +44,6 @@ public class SQLUtil extends PreloadedDatabaseHelper {
     private static final String COLUMN_ANSWER_DESCRIPTION = "answerDescription";
 
     /**
-     * The path to the database used
-     */
-    private String DB_PATH = null;
-
-    /**
-     * The name of the database used
-     */
-    private String DB_NAME = null;
-
-    /**
      * SQLite database object to realize class operations
      */
     private static SQLiteDatabase sqliteDatabase = null;
