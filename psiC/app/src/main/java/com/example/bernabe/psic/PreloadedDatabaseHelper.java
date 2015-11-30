@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class PreloadedDatabaseHelper extends SQLiteOpenHelper {
     public void createDataBase() throws IOException {
         boolean dbExist = checkDataBase();
 
-        if (dbExist) {
+        if (!dbExist) {
             //By calling this method and empty database will be created into the default system path
             //of your application so we are gonna be able to overwrite that database with our database.
             this.getReadableDatabase();
@@ -58,7 +59,7 @@ public class PreloadedDatabaseHelper extends SQLiteOpenHelper {
         try{
             String myPath = DB_PATH + DB_NAME;
             checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-        }catch(SQLiteException e){
+        }catch(Exception e){
             //Database doesn't exist yet
         }
 
@@ -75,7 +76,7 @@ public class PreloadedDatabaseHelper extends SQLiteOpenHelper {
      * This is done by transfering bytestream.
      * */
     private void copyDataBase() throws IOException{
-
+        Log.e("prueba", DB_NAME);
         //Open your local db as the input stream
         InputStream myInput = context.getAssets().open(DB_NAME);
 
