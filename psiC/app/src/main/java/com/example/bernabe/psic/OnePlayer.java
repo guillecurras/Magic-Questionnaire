@@ -72,7 +72,7 @@ public class OnePlayer extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         this.initCache();
-        
+
 
         if (hQuestion != null){
             Enumeration keys = hQuestion.keys();
@@ -125,7 +125,7 @@ public class OnePlayer extends ActionBarActivity {
         nextQuestion = parser.getSiguientePregunta(boton.getText().toString());
 
         if (!nextQuestion.startsWith("#")) {
-            questionTextView.setText(nextQuestion);
+            questionTextView.setText(nextQuestion.replaceAll("-", " "));
             if (hQuestion != null && hQuestion.containsKey(actualQuestion))
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
         } else {
