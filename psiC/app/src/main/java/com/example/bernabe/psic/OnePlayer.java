@@ -72,7 +72,7 @@ public class OnePlayer extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         this.initCache();
-
+        
 
         if (hQuestion != null){
             Enumeration keys = hQuestion.keys();
@@ -80,6 +80,7 @@ public class OnePlayer extends ActionBarActivity {
                 Log.e("Clave", keys.nextElement().toString());
             }
         }
+
         // Init answer's table
         hAnswer = new Hashtable();
 
