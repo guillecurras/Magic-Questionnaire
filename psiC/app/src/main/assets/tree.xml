@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DecisionTree type="treestring">
+	<Test attribute="Is-it-alive?" operator="=" value="YES">
+		<Test attribute="Can-it-swim?" operator="=" value="YES">
+			<Test attribute="Does-it-meow?" operator="=" value="YES">
+				<Output decision="Yes" info="(1.0)"/>
+			</Test>
+			<Test attribute="Does-it-meow?" operator="=" value="NO">
+				<Output decision="Clown fish" info="(2.0/1.0)"/>
+			</Test>
+			<Test attribute="Does-it-meow?" operator="=" value="MAYBE">
+				<Output decision="Clown fish" info="(0.0)"/>
+			</Test>
+		</Test>
+		<Test attribute="Can-it-swim?" operator="=" value="NO">
+			<Test attribute="Is-it-hirsute?" operator="=" value="YES">
+				<Test attribute="Does-it-meow?" operator="=" value="YES">
+					<Output decision="Cat" info="(1.0)"/>
+				</Test>
+				<Test attribute="Does-it-meow?" operator="=" value="NO">
+					<Test attribute="Can-we-drink-it?" operator="=" value="YES">
+						<Output decision="Cow" info="(1.0)"/>
+					</Test>
+					<Test attribute="Can-we-drink-it?" operator="=" value="NO">
+						<Output decision="Hamster" info="(2.0/1.0)"/>
+					</Test>
+					<Test attribute="Can-we-drink-it?" operator="=" value="MAYBE">
+						<Output decision="Hamster" info="(0.0)"/>
+					</Test>
+				</Test>
+				<Test attribute="Does-it-meow?" operator="=" value="MAYBE">
+					<Output decision="Cat" info="(0.0)"/>
+				</Test>
+			</Test>
+			<Test attribute="Is-it-hirsute?" operator="=" value="NO">
+				<Output decision="Hen" info="(1.0)"/>
+			</Test>
+			<Test attribute="Is-it-hirsute?" operator="=" value="MAYBE">
+				<Output decision="Horse" info="(1.0)"/>
+			</Test>
+		</Test>
+		<Test attribute="Can-it-swim?" operator="=" value="MAYBE">
+			<Output decision="Skanke" info="(1.0)"/>
+		</Test>
+	</Test>
+	<Test attribute="Is-it-alive?" operator="=" value="NO">
+		<Test attribute="Is-it-electronic?" operator="=" value="YES">
+			<Test attribute="Does-it-have-a-keyboard?" operator="=" value="YES">
+				<Test attribute="Does-it-allow-to-send-SMSs?"
+					operator="=" value="YES">
+					<Output decision="Phone" info="(1.0)"/>
+				</Test>
+				<Test attribute="Does-it-allow-to-send-SMSs?"
+					operator="=" value="NO">
+					<Test attribute="Can-we-store-things-in-it?"
+						operator="=" value="YES">
+						<Output decision="Computer" info="(0.0)"/>
+					</Test>
+					<Test attribute="Can-we-store-things-in-it?"
+						operator="=" value="NO">
+						<Output decision="Remote control" info="(1.0)"/>
+					</Test>
+					<Test attribute="Can-we-store-things-in-it?"
+						operator="=" value="MAYBE">
+						<Output decision="Computer" info="(1.0)"/>
+					</Test>
+				</Test>
+				<Test attribute="Does-it-allow-to-send-SMSs?"
+					operator="=" value="MAYBE">
+					<Output decision="Computer" info="(0.0)"/>
+				</Test>
+			</Test>
+			<Test attribute="Does-it-have-a-keyboard?" operator="=" value="NO">
+				<Test attribute="Can-we-store-things-in-it?"
+					operator="=" value="YES">
+					<Output decision="Television" info="(0.0)"/>
+				</Test>
+				<Test attribute="Can-we-store-things-in-it?"
+					operator="=" value="NO">
+					<Test attribute="Is-it-a-videoconsole?"
+						operator="=" value="YES">
+						<Output decision="Wii" info="(2.5/1.5)"/>
+					</Test>
+					<Test attribute="Is-it-a-videoconsole?"
+						operator="=" value="NO">
+						<Output decision="Television" info="(2.5/1.5)"/>
+					</Test>
+					<Test attribute="Is-it-a-videoconsole?"
+						operator="=" value="MAYBE">
+						<Output decision="Television" info="(0.0)"/>
+					</Test>
+				</Test>
+				<Test attribute="Can-we-store-things-in-it?"
+					operator="=" value="MAYBE">
+					<Output decision="Photo camera" info="(1.0)"/>
+				</Test>
+			</Test>
+			<Test attribute="Does-it-have-a-keyboard?" operator="=" value="MAYBE">
+				<Output decision="Computer" info="(0.0)"/>
+			</Test>
+		</Test>
+		<Test attribute="Is-it-electronic?" operator="=" value="NO">
+			<Test attribute="Can-we-drink-it?" operator="=" value="YES">
+				<Output decision="Coca Cola" info="(1.0)"/>
+			</Test>
+			<Test attribute="Can-we-drink-it?" operator="=" value="NO">
+				<Test attribute="Can-we-store-things-in-it?"
+					operator="=" value="YES">
+					<Test attribute="Is-it-a-furniture?"
+						operator="=" value="YES">
+						<Output decision="Closet" info="(1.0)"/>
+					</Test>
+					<Test attribute="Is-it-a-furniture?"
+						operator="=" value="NO">
+						<Output decision="Garbage bag" info="(1.0)"/>
+					</Test>
+					<Test attribute="Is-it-a-furniture?"
+						operator="=" value="MAYBE">
+						<Output decision="Closet" info="(0.0)"/>
+					</Test>
+				</Test>
+				<Test attribute="Can-we-store-things-in-it?"
+					operator="=" value="NO">
+					<Test attribute="Is-it-a-furniture?"
+						operator="=" value="YES">
+						<Output decision="Table" info="(1.0)"/>
+					</Test>
+					<Test attribute="Is-it-a-furniture?"
+						operator="=" value="NO">
+						<Test attribute="Is-it-a-videoconsole?"
+							operator="=" value="YES">
+							<Output decision="Book" info="(0.0)"/>
+						</Test>
+						<Test attribute="Is-it-a-videoconsole?"
+							operator="=" value="NO">
+							<Output decision="Nothing" info="(6.4/5.4)"/>
+						</Test>
+						<Test attribute="Is-it-a-videoconsole?"
+							operator="=" value="MAYBE">
+							<Output decision="Book" info="(1.6/0.6)"/>
+						</Test>
+					</Test>
+					<Test attribute="Is-it-a-furniture?"
+						operator="=" value="MAYBE">
+						<Output decision="Book" info="(0.0)"/>
+					</Test>
+				</Test>
+				<Test attribute="Can-we-store-things-in-it?"
+					operator="=" value="MAYBE">
+					<Output decision="Book" info="(0.0)"/>
+				</Test>
+			</Test>
+			<Test attribute="Can-we-drink-it?" operator="=" value="MAYBE">
+				<Output decision="Book" info="(0.0)"/>
+			</Test>
+		</Test>
+		<Test attribute="Is-it-electronic?" operator="=" value="MAYBE">
+			<Output decision="Computer" info="(0.0)"/>
+		</Test>
+	</Test>
+	<Test attribute="Is-it-alive?" operator="=" value="MAYBE">
+		<Output decision="God" info="(1.0)"/>
+	</Test>
+</DecisionTree>

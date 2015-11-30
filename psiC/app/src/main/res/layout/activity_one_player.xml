@@ -31,7 +31,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Yes"
+        android:text="YES"
         android:id="@+id/boton_yes"
         android:layout_below="@+id/texto_one_2"
         android:layout_marginLeft="20dp"
@@ -42,7 +42,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No"
+        android:text="NO"
         android:id="@+id/boton_not"
         android:layout_below="@+id/boton_yes"
         android:layout_marginLeft="20dp"
@@ -53,7 +53,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Maybe/NC"
+        android:text="MAYBE"
         android:id="@+id/boton_maybe"
         android:layout_below="@+id/boton_not"
         android:layout_marginLeft="20dp"

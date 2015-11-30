@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 
 
 public class OnePlayer extends ActionBarActivity {
@@ -55,6 +57,8 @@ public class OnePlayer extends ActionBarActivity {
      */
     private SQLUtil sqlUtil;
 
+
+
     public final static String EXTRA_MESSAGE = "com.bernabe.psic.MESSAGE";
 
     String nextQuestion = "";
@@ -69,6 +73,13 @@ public class OnePlayer extends ActionBarActivity {
 
         this.initCache();
 
+
+        if (hQuestion != null){
+            Enumeration keys = hQuestion.keys();
+            while (keys.hasMoreElements()) {
+                Log.e("Clave", keys.nextElement().toString());
+            }
+        }
         // Init answer's table
         hAnswer = new Hashtable();
 
@@ -117,7 +128,7 @@ public class OnePlayer extends ActionBarActivity {
             if (hQuestion != null && hQuestion.containsKey(actualQuestion))
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
         } else {
-            questionTextView.setText("Estabas pensando en un: " + nextQuestion.substring(1));
+            questionTextView.setText("You were thinking of: " + nextQuestion.substring(1));
             if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
                     && hItem.containsKey(nextQuestion.substring(1))) {
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
@@ -141,7 +152,39 @@ public class OnePlayer extends ActionBarActivity {
     public File obtenerArbol()  // De momento cargo un árbol que hay en la carpeta Assets.
                                 // Habrá que cambiar este método para que llame a weka y calcule el árbol.
     {
+
         AssetManager assetManager = getAssets();
+        InputStream in = null;
+        OutputStream out = null;
+
+        File wekaTree = null;
+        try {
+            in = assetManager.open("tree.xml");
+            wekaTree = new File(getFilesDir(), "tree2.xml");
+            out = new FileOutputStream(wekaTree);
+            copyFile(in, out);
+        } catch(IOException e) {
+            Log.e("tag", "Failed to copy asset file: " + "tree.txt", e);
+        }
+        finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // NOOP
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // NOOP
+                }
+            }
+        }
+
+        return wekaTree;
+      /*  AssetManager assetManager = getAssets();
         InputStream in = null;
         OutputStream out = null;
 
@@ -184,7 +227,7 @@ public class OnePlayer extends ActionBarActivity {
 //        catch (Exception e) {
 //        }
 
-        return treeXMLFile;
+        return treeXMLFile;*/
 
     }
     private void copyFile(InputStream in, OutputStream out) throws IOException {
