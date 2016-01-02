@@ -5,9 +5,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
+
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
 
 import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
@@ -20,17 +30,20 @@ import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 public class SQLUtil extends PreloadedDatabaseHelper {
 
+    private static final String ANDROID_PREDEFINED_ID = "_id";
+
     /* Table question variables */
     private static final String TABLE_QUESTION = "question";
 
-    private static final String COLUMN_QUESTION_ID = "_id";
+    private static final String COLUMN_QUESTION_ID = "questionId";
 
     private static final String COLUMN_QUESTION = "question";
 
     /* Table item variables */
+
     private static final String TABLE_ITEM = "item";
 
-    private static final String COLUMN_ITEM_ID = "_id";
+    private static final String COLUMN_ITEM_ID = "itemId";
 
     private static final String COLUMN_ITEM = "item";
 
@@ -39,7 +52,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
 
     private static final String COLUMN_ROUND_NUMBER = "roundNumber";
 
-    private static final String COLUMN_ANSWER_ID = "_id";
+    private static final String COLUMN_ANSWER_ID = "answerId";
 
     private static final String COLUMN_ANSWER_DESCRIPTION = "answerDescription";
 
@@ -82,15 +95,16 @@ public class SQLUtil extends PreloadedDatabaseHelper {
      * @return sWekaInput A string with the weka input
      * @throws Exception
      */
-    public String generateWekaInput (int roundNumber) throws Exception {
-        String sWekaInput = new String();
+    public Hashtable generateWekaRoundInput(int roundNumber) throws Exception {
+        Hashtable hWekaInput = new Hashtable();
 
         // Query sentence for find all the pairs answer-question
-        String answersQuery = "SELECT roundAnswers." + COLUMN_ANSWER_DESCRIPTION + ", " + TABLE_ITEM + "." + COLUMN_ITEM
+        String answersQuery = "SELECT roundAnswers." + COLUMN_ANSWER_DESCRIPTION + ", " + TABLE_ITEM + "."
+                + ANDROID_PREDEFINED_ID + " AS " + COLUMN_ITEM_ID + ", " + TABLE_QUESTION + "." + ANDROID_PREDEFINED_ID + " AS " + COLUMN_QUESTION_ID
                 + " FROM " + TABLE_QUESTION + " LEFT OUTER JOIN "
                 + "(SELECT * FROM " + TABLE_ANSWER + " WHERE " + COLUMN_ROUND_NUMBER + " = ?) AS roundAnswers ON "
-                + TABLE_QUESTION + "." + COLUMN_QUESTION_ID + " = roundAnswers." + COLUMN_QUESTION_ID + " LEFT OUTER JOIN "
-                + TABLE_ITEM + " ON roundAnswers." + COLUMN_ITEM_ID + " = " + TABLE_ITEM + "." + COLUMN_ITEM_ID;
+                + TABLE_QUESTION + "." + ANDROID_PREDEFINED_ID + " = roundAnswers." + COLUMN_QUESTION_ID + " LEFT OUTER JOIN "
+                + TABLE_ITEM + " ON roundAnswers." + COLUMN_ITEM_ID + " = " + TABLE_ITEM + "." + ANDROID_PREDEFINED_ID;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()){
             this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
@@ -103,23 +117,24 @@ public class SQLUtil extends PreloadedDatabaseHelper {
         try {
             queryArgs[0] = String.valueOf(roundNumber); // Set the query filter
             Cursor queryResult = this.sqliteDatabase.rawQuery(answersQuery, queryArgs);
-            String newItem = null;
+            Integer newItem = null;
             for (int i = 0; i< queryResult.getCount(); i++) {
+                String newAnswer;
+                int questionId;
                 queryResult.moveToPosition(i);
                 if (newItem == null) // Obtain the item found in that round
-                    newItem = queryResult.getString(queryResult.getColumnIndex(COLUMN_ITEM));
-                String newAnswer = queryResult.getString(queryResult.getColumnIndex(COLUMN_ANSWER_DESCRIPTION));
-                if (newAnswer == null) // Creating the output with the answers
-                    sWekaInput += ",";
-                else if (!newAnswer.contains(" "))
-                    sWekaInput += newAnswer + ",";
-                else
-                    sWekaInput += "\"" + newAnswer + "\"," ;
+                    newItem = queryResult.getInt(queryResult.getColumnIndex(COLUMN_ITEM_ID));
+                if (queryResult.getString(queryResult.getColumnIndex(COLUMN_ANSWER_DESCRIPTION)) != null &&
+                        queryResult.getString(queryResult.getColumnIndex(COLUMN_QUESTION_ID)) != null) {
+                    newAnswer = queryResult.getString(queryResult.getColumnIndex(COLUMN_ANSWER_DESCRIPTION));
+                    questionId = queryResult.getInt(queryResult.getColumnIndex(COLUMN_QUESTION_ID));
+                    hWekaInput.put(questionId, newAnswer);
+                }
             }
-            if (newItem.contains(" ")) // Adding the item obtained
-                sWekaInput += "\"" + newItem + "\"" ;
-            else
-                sWekaInput += newItem;
+            if (newItem != null) {
+                String sItem = String.valueOf(newItem);
+                hWekaInput.put("item", sItem);
+            }
         } catch (Exception e){
             throw new Exception("M_ERROR_GENERATING_WEKA_INPUT " + e.getMessage());
         } finally {
@@ -130,7 +145,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
             }
         }
 
-        return sWekaInput;
+        return hWekaInput;
     }
 
     /**
@@ -223,7 +238,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
             for (int i = 0; i< queryResult.getCount(); i++) { // Inserting each round in the question's vector
                 queryResult.moveToPosition(i);
-                hQuestion.put(queryResult.getString(queryResult.getColumnIndex(COLUMN_QUESTION)), queryResult.getInt(queryResult.getColumnIndex(COLUMN_QUESTION_ID)));
+                hQuestion.put(queryResult.getInt(queryResult.getColumnIndex(ANDROID_PREDEFINED_ID)), queryResult.getString(queryResult.getColumnIndex(COLUMN_QUESTION)));
             }
         } catch (Exception e){
             throw new Exception("M_ERROR_GETTING_QUESTIONS " + e.getMessage());
@@ -256,7 +271,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
             Cursor queryResult = this.sqliteDatabase.rawQuery(sQueryAllItem, null);
             for (int i = 0; i< queryResult.getCount(); i++) { // Inserting each item in the item's vector
                 queryResult.moveToPosition(i);
-                hItem.put(queryResult.getString(queryResult.getColumnIndex(COLUMN_ITEM)), queryResult.getInt(queryResult.getColumnIndex(COLUMN_ITEM_ID)));
+                hItem.put(queryResult.getInt(queryResult.getColumnIndex(ANDROID_PREDEFINED_ID)), queryResult.getString(queryResult.getColumnIndex(COLUMN_ITEM)));
             }
         } catch (Exception e){
             throw new Exception("M_ERROR_GETTING_ITEMS " + e.getMessage());
@@ -323,4 +338,84 @@ public class SQLUtil extends PreloadedDatabaseHelper {
 
     }
 
+    public ArrayList getWekaAttributes () throws Exception {
+        ArrayList vWekaAttributes = new ArrayList();
+
+        // Setting up the question attributes
+        Hashtable hQuestions = this.getAllQuestion();
+        Enumeration enQuestionId = hQuestions.keys();
+        while (enQuestionId.hasMoreElements()) {
+            Object questionId = enQuestionId.nextElement();
+            vWekaAttributes.add(new Attribute(questionId.toString()));
+        }
+
+        // Setting up the item (class) attribute
+        Attribute classAttribute = getWekaClassAttribute();
+        vWekaAttributes.add(classAttribute);
+
+        return vWekaAttributes;
+    }
+
+    public Attribute getWekaClassAttribute () throws Exception {
+        Attribute classAttribute = null;
+
+        Hashtable hItem = this.getAllItem();
+        ArrayList vClassValues = new ArrayList();
+        Enumeration enItemId = hItem.keys();
+        while (enItemId.hasMoreElements()) {
+            Object itemId = enItemId.nextElement();
+            vClassValues.add(itemId.toString());
+        }
+        classAttribute = new Attribute("item", vClassValues);
+
+        return classAttribute;
+    }
+
+    public Instances generateWekaInstances () throws Exception {
+        Instances wekaInstances = null;
+
+        Vector vRounds = this.getAllRounds();
+        ArrayList vWekaAttributes = this.getWekaAttributes();
+        Attribute classAttribute = this.getWekaClassAttribute();
+
+        int classIndex = vWekaAttributes.size() - 1;
+
+        if (vRounds != null && !vRounds.isEmpty()) {
+            Instance roundInstance = null;
+            wekaInstances = new Instances("Rel", vWekaAttributes, vRounds.size());
+            wekaInstances.setClassIndex(classIndex);
+            for (int i = 0; i < vRounds.size(); i++) {
+                Hashtable hWekaData = this.generateWekaRoundInput((int)vRounds.get(i));
+                if (hWekaData != null && !hWekaData.isEmpty()) {
+                    roundInstance = new SparseInstance(vWekaAttributes.size());
+                    roundInstance.setDataset(wekaInstances);
+                    Enumeration enumQuestions = hWekaData.keys();
+                    while (enumQuestions.hasMoreElements()) {
+                        Object key = enumQuestions.nextElement();
+                        if (key instanceof Number) { // Hay que setear los atributos de la instancia previamente. Lo tal seria meterle todas las questions al crear la instancia
+                            Attribute attr = new Attribute(key.toString());
+                            int wekaAttrIndex = vWekaAttributes.indexOf(attr);
+                            if (wekaAttrIndex != -1) {
+                                double numericAttrValue = -1;
+                                if (hWekaData.get(key).toString().equalsIgnoreCase("NO"))
+                                    numericAttrValue = 0;
+                                else if (hWekaData.get(key).toString().equalsIgnoreCase("MAYBE"))
+                                    numericAttrValue = 0.5;
+                                else if (hWekaData.get(key).toString().equalsIgnoreCase("YES"))
+                                    numericAttrValue = 1;
+                                if (numericAttrValue != -1)
+                                    roundInstance.setValue(wekaAttrIndex, numericAttrValue);
+                            }
+                        }else if (key instanceof String && key.toString().equalsIgnoreCase("item")) {
+                            roundInstance.setValue(classIndex, hWekaData.get(key).toString());
+                        }
+                    }
+                    if (roundInstance != null)
+                        wekaInstances.add(roundInstance);
+                }
+            }
+        }
+
+        return wekaInstances;
+    }
 }

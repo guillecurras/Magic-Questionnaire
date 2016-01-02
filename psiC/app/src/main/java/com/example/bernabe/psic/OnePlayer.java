@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.inra.qualscape.wekatexttoxml.WekaTextfileToXMLTextfile;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,8 +19,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Map;
 
+import weka.classifiers.trees.J48;
+import weka.core.Instances;
 
 public class OnePlayer extends ActionBarActivity {
 
@@ -35,12 +38,12 @@ public class OnePlayer extends ActionBarActivity {
     /**
      * @variable hQuestion All question cache
      */
-    private static Hashtable <String, Integer> hQuestion;
+    private static Hashtable hQuestion;
 
     /**
      * @variable hItem All item cache
      */
-    private static Hashtable <String, Integer> hItem;
+    private static Hashtable hItem;
 
     /**
      * @variable roundNumber The round number of the actual game
@@ -57,7 +60,7 @@ public class OnePlayer extends ActionBarActivity {
      */
     private SQLUtil sqlUtil;
 
-
+    J48 treeClassifier;
 
     public final static String EXTRA_MESSAGE = "com.bernabe.psic.MESSAGE";
 
@@ -81,10 +84,18 @@ public class OnePlayer extends ActionBarActivity {
             }
         }
 
-        // Init answer's table
+        /* Init answer's table */
         hAnswer = new Hashtable();
+        try {
+            // Prueba del arbol
+            Instances wekaInput = sqlUtil.generateWekaInstances();
+            treeClassifier = new J48();
+            treeClassifier.buildClassifier(wekaInput);
+            treeClassifier.graph();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
-        super.onCreate(savedInstanceState);
         Log.d("CREATE", "Recibido-one");
         Intent intent = getIntent();
         setContentView(R.layout.activity_one_player);
@@ -124,16 +135,17 @@ public class OnePlayer extends ActionBarActivity {
         String actualQuestion = nextQuestion;
         nextQuestion = parser.getSiguientePregunta(boton.getText().toString());
 
+        String sNewQuestion = hQuestion.get(nextQuestion).toString();
         if (!nextQuestion.startsWith("#")) {
-            questionTextView.setText(nextQuestion.replaceAll("-", " "));
+            questionTextView.setText(sNewQuestion.replaceAll("-", " "));
             if (hQuestion != null && hQuestion.containsKey(actualQuestion))
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
         } else {
-            questionTextView.setText("You were thinking of: " + nextQuestion.substring(1));
+            questionTextView.setText("You were thinking of: " + sNewQuestion.substring(1));
             if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
-                    && hItem.containsKey(nextQuestion.substring(1))) {
-                hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
-                hAnswer.put("item", hItem.get(nextQuestion.substring(1)));
+                    && hItem.containsKey(sNewQuestion.substring(1))) {
+                hAnswer.put(nextQuestion, boton.getText());
+                hAnswer.put("item", nextQuestion.substring(1));
 
                 try {
                     this.sqlUtil.insertNewWekaData(hAnswer);
