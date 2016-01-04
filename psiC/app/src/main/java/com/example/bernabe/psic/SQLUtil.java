@@ -406,7 +406,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
                                 if (numericAttrValue != -1)
                                     roundInstance.setValue(wekaAttrIndex, numericAttrValue);
                             }
-                        }else if (key instanceof String && key.toString().equalsIgnoreCase("item")) {
+                        }else if (key instanceof String && key.toString().equalsIgnoreCase("item") && !(hWekaData.get(key).toString() == "0")) {
                             roundInstance.setValue(classIndex, hWekaData.get(key).toString());
                         }
                     }

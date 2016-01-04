@@ -62,7 +62,7 @@ public class Parser {
         return atts.getNamedItem("attribute").getNodeValue();
     }
 
-    public String getSiguientePregunta(String respuesta)  //TODO: Implementar
+    public String getSiguientePregunta(double respuesta)
     {
         if (nodos == null)
         {
@@ -71,15 +71,29 @@ public class Parser {
         for (int i = 0; i < nodos.getLength(); i++) {
             if (nodos.item(i).getNodeName().equals("Test")) {
                 atts = nodos.item(i).getAttributes();
-                if (atts.getNamedItem("value").getTextContent().trim().equals(respuesta)) {
-                    NodeList nextlist = nodos.item(i).getChildNodes();
-                    for (int j = 0; j < nextlist.getLength(); j++) {
-                        if (nextlist.item(j).getNodeName().equals("Output")) {
-                            return "#" + nextlist.item(j).getAttributes().getNamedItem("decision").getNodeValue();
+                if (atts.getNamedItem("operator").getTextContent().trim().equals("<=")) {
+                    if (respuesta <= Double.parseDouble(atts.getNamedItem("value").getTextContent().trim())){
+                        NodeList nextlist = nodos.item(i).getChildNodes();
+                        for (int j = 0; j < nextlist.getLength(); j++) {
+                            if (nextlist.item(j).getNodeName().equals("Output")) {
+                                return "#" + nextlist.item(j).getAttributes().getNamedItem("decision").getNodeValue();
+                            } else if (nextlist.item(j).getNodeName().equals("Test")) {
+                                nodos = nextlist;
+                                return nextlist.item(j).getAttributes().getNamedItem("attribute").getNodeValue();
+                            }
                         }
-                        else if (nextlist.item(j).getNodeName().equals("Test")) {
-                            nodos = nextlist;
-                            return nextlist.item(j).getAttributes().getNamedItem("attribute").getNodeValue();
+                    }
+                }
+                else if (atts.getNamedItem("operator").getTextContent().trim().equals(">")) {
+                    if (respuesta > Double.parseDouble(atts.getNamedItem("value").getTextContent().trim())){
+                        NodeList nextlist = nodos.item(i).getChildNodes();
+                        for (int j = 0; j < nextlist.getLength(); j++) {
+                            if (nextlist.item(j).getNodeName().equals("Output")) {
+                                return "#" + nextlist.item(j).getAttributes().getNamedItem("decision").getNodeValue();
+                            } else if (nextlist.item(j).getNodeName().equals("Test")) {
+                                nodos = nextlist;
+                                return nextlist.item(j).getAttributes().getNamedItem("attribute").getNodeValue();
+                            }
                         }
                     }
                 }

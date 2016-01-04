@@ -11,13 +11,19 @@ import android.widget.TextView;
 
 import org.inra.qualscape.wekatexttoxml.WekaTextfileToXMLTextfile;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import weka.classifiers.trees.J48;
@@ -72,8 +78,18 @@ public class OnePlayer extends ActionBarActivity {
 
     ArrayList<Button> botones = new ArrayList<Button>();
 
-    protected void onCreate(Bundle savedInstanceState) {
+    private static final HashMap<String, Double> answerToDouble = new  HashMap<String, Double>(3);
+    static
+    {
+        answerToDouble.put("YES", 1.0);
+        answerToDouble.put("MAYBE", 0.5);
+        answerToDouble.put("NO", 0.0);
 
+
+    }
+
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         this.initCache();
 
 
@@ -89,9 +105,13 @@ public class OnePlayer extends ActionBarActivity {
         try {
             // Prueba del arbol
             Instances wekaInput = sqlUtil.generateWekaInstances();
+            Log.d("Instances", wekaInput.toString().replace("\n\n", "\n"));
             treeClassifier = new J48();
+            String[] options = weka.core.Utils.splitOptions("-M 1");
+            treeClassifier.setOptions(options);
             treeClassifier.buildClassifier(wekaInput);
-            treeClassifier.graph();
+
+            Log.d("Arbol", treeClassifier.toString().replace("\n\n", "\n"));
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -106,8 +126,8 @@ public class OnePlayer extends ActionBarActivity {
             parser = new Parser(tree);
 
         questionTextView = (TextView) findViewById(R.id.texto_one_2);
-        nextQuestion = parser.getSiguientePregunta("");
-        questionTextView.setText(nextQuestion);
+        nextQuestion = parser.getSiguientePregunta(-1);
+        questionTextView.setText(hQuestion.get(Integer.parseInt(nextQuestion)).toString());
         questionTextView.setTextSize(40);
         Log.d("CREATE", "Listo-One");
 
@@ -133,17 +153,17 @@ public class OnePlayer extends ActionBarActivity {
     {
         Button boton = (Button) view;
         String actualQuestion = nextQuestion;
-        nextQuestion = parser.getSiguientePregunta(boton.getText().toString());
+        nextQuestion = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
 
-        String sNewQuestion = hQuestion.get(nextQuestion).toString();
         if (!nextQuestion.startsWith("#")) {
+            String sNewQuestion = hQuestion.get(Integer.parseInt(nextQuestion)).toString();
             questionTextView.setText(sNewQuestion.replaceAll("-", " "));
             if (hQuestion != null && hQuestion.containsKey(actualQuestion))
                 hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
         } else {
-            questionTextView.setText("You were thinking of: " + sNewQuestion.substring(1));
+            questionTextView.setText("You were thinking of: " + hItem.get(Integer.parseInt(nextQuestion.substring(1))));
             if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
-                    && hItem.containsKey(sNewQuestion.substring(1))) {
+                    && hItem.containsKey(Integer.parseInt(nextQuestion.substring(1)))) {
                 hAnswer.put(nextQuestion, boton.getText());
                 hAnswer.put("item", nextQuestion.substring(1));
 
@@ -165,7 +185,7 @@ public class OnePlayer extends ActionBarActivity {
     public File obtenerArbol()  // De momento cargo un árbol que hay en la carpeta Assets.
                                 // Habrá que cambiar este método para que llame a weka y calcule el árbol.
     {
-
+/*
         AssetManager assetManager = getAssets();
         InputStream in = null;
         OutputStream out = null;
@@ -196,7 +216,52 @@ public class OnePlayer extends ActionBarActivity {
             }
         }
 
-        return wekaTree;
+        return wekaTree;*/
+
+        AssetManager assetManager = getAssets();
+        OutputStream out = null;
+
+        File treeTextFile = null;
+        try {
+            treeTextFile = new File(getFilesDir(), "tree.txt");
+            out = new FileOutputStream(treeTextFile);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(out);
+            outputStreamWriter.write(treeClassifier.toString().split("\n\n")[1]);
+            outputStreamWriter.close();
+        }
+        catch(IOException e) {
+            Log.e("tag", "Failed to copy asset file: " + "tree.txt", e);
+        }
+        finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // NOOP
+                }
+            }
+        }
+
+        File treeXMLFile = new File(getFilesDir(), "tree.xml");
+
+        Log.d("File", readFromFile(treeTextFile));
+
+        // TODO: Remove
+        // J48 pruned tree
+        // ------------------
+
+        new WekaToXML(treeTextFile, treeXMLFile, true, false).writeXmlFromWekaText();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeXMLFile), "UTF-8"))) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                Log.d("XML", line);
+            }
+        }
+        catch (Exception e) {
+        }
+
+        return treeXMLFile;
       /*  AssetManager assetManager = getAssets();
         InputStream in = null;
         OutputStream out = null;
@@ -243,6 +308,39 @@ public class OnePlayer extends ActionBarActivity {
         return treeXMLFile;*/
 
     }
+
+    private String readFromFile(File file) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = new FileInputStream(file);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                    stringBuilder.append('\n');
+
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
     private void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
