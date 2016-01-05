@@ -22,6 +22,7 @@ public class Quiz extends ActionBarActivity {
         Intent intent = new Intent(this,OnePlayer.class);
         String message = "Primera pregunta";
         intent.putExtra(EXTRA_MESSAGE, message);
+        finish();
         startActivity(intent);
         Log.d("CREATION", "Start One - 1");
     }

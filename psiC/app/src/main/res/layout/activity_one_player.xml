@@ -62,6 +62,31 @@
         android:onClick="handlerBotones"
         />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SEND"
+        android:id="@+id/boton_send"
+        android:layout_below="@+id/edittext_answer"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="40dp"
+        android:onClick="handlerBotones"
+        android:visibility="invisible"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edittext_answer"
+        android:layout_below="@+id/texto_one_2"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="40dp"
+        android:onClick="handlerBotones"
+        android:visibility="invisible"
+        />
+
 
     <!--<Button-->
     <!--android:layout_width="match_parent"-->

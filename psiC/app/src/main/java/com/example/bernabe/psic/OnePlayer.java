@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.inra.qualscape.wekatexttoxml.WekaTextfileToXMLTextfile;
@@ -44,12 +46,12 @@ public class OnePlayer extends ActionBarActivity {
     /**
      * @variable hQuestion All question cache
      */
-    private static Hashtable hQuestion;
+    private Hashtable hQuestion;
 
     /**
      * @variable hItem All item cache
      */
-    private static Hashtable hItem;
+    private Hashtable hItem;
 
     /**
      * @variable roundNumber The round number of the actual game
@@ -73,8 +75,9 @@ public class OnePlayer extends ActionBarActivity {
     String nextQuestion = "";
 
     File tree = null;
-    static Parser parser = null;
+    Parser parser = null;
     TextView questionTextView;
+    boolean answerFound = false;
 
     ArrayList<Button> botones = new ArrayList<Button>();
 
@@ -152,35 +155,96 @@ public class OnePlayer extends ActionBarActivity {
     public void handlerBotones(View view)
     {
         Button boton = (Button) view;
-        String actualQuestion = nextQuestion;
-        nextQuestion = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
 
-        if (!nextQuestion.startsWith("#")) {
-            String sNewQuestion = hQuestion.get(Integer.parseInt(nextQuestion)).toString();
-            questionTextView.setText(sNewQuestion.replaceAll("-", " "));
-            if (hQuestion != null && hQuestion.containsKey(actualQuestion))
-                hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
-        } else {
-            questionTextView.setText("You were thinking of: " + hItem.get(Integer.parseInt(nextQuestion.substring(1))));
-            if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
-                    && hItem.containsKey(Integer.parseInt(nextQuestion.substring(1)))) {
-                hAnswer.put(nextQuestion, boton.getText());
-                hAnswer.put("item", nextQuestion.substring(1));
+        if (answerFound == false) {
+            String actualQuestion = nextQuestion;
+            nextQuestion = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
+            if (!nextQuestion.startsWith("#")) {
+                String sNewQuestion = hQuestion.get(Integer.parseInt(nextQuestion)).toString();
+                questionTextView.setText(sNewQuestion);
+                if (hQuestion != null && hQuestion.containsKey(actualQuestion))
+                    hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
+            } else {
+                questionTextView.setText("Were you thinking of " + hItem.get(Integer.parseInt(nextQuestion.substring(1))) + "?");
+                if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
+                        && hItem.containsKey(Integer.parseInt(nextQuestion.substring(1)))) {
+                    hAnswer.put(nextQuestion, boton.getText());
+                    hAnswer.put("item", nextQuestion.substring(1));
 
-                try {
-                    this.sqlUtil.insertNewWekaData(hAnswer);
-                } catch (Exception e) {
-                    Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
-                    e.printStackTrace();
+                    try {
+                        this.sqlUtil.insertNewWekaData(hAnswer);
+                    } catch (Exception e) {
+                        Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
+                for (Button boton2 : botones) {
+                    if (boton2.getText().toString().trim().equals("MAYBE"))
+                        boton2.setVisibility(View.GONE);
+                }
+
+                answerFound = true;
             }
-            for (Button boton2 : botones)
+        }
+        else            // We have a guess
+        {
+            if (boton.getText().toString().equals("YES"))
             {
-                boton2.setVisibility(View.GONE);
+                // TODO: Meter el resultado en la base de datos
+            }
+            else
+            {
+                for (Button boton2 : botones) {
+                    if (boton2.getText().toString().trim().equals("MAYBE"))
+                        boton2.setVisibility(View.GONE);
+                }
+
+                Button sendButton = (Button) findViewById(R.id.boton_send);
+                final EditText answerText = (EditText) findViewById(R.id.edittext_answer);
+
+                for (Button boton2 : botones) {
+                    boton2.setVisibility(View.GONE);
+                }
+
+                questionTextView.setText("What were you thinking of?");
+                sendButton.setVisibility(View.VISIBLE);
+                answerText.setVisibility(View.VISIBLE);
+
+                sendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String answer = answerText.getText().toString();
+
+                        // TODO: Añadir la respuesta a la base de datos.
+                    }
+                });
+
+
             }
         }
     }
 
+    private static ViewGroup getParent(View view) {
+        return (ViewGroup)view.getParent();
+    }
+
+    private static void removeView(View view) {
+        ViewGroup parent = getParent(view);
+        if(parent != null) {
+            parent.removeView(view);
+        }
+    }
+
+    private static void replaceView(View currentView, View newView) {
+        ViewGroup parent = getParent(currentView);
+        if(parent == null) {
+            return;
+        }
+        final int index = parent.indexOfChild(currentView);
+        removeView(currentView);
+        removeView(newView);
+        parent.addView(newView, index);
+    }
 
     public File obtenerArbol()  // De momento cargo un árbol que hay en la carpeta Assets.
                                 // Habrá que cambiar este método para que llame a weka y calcule el árbol.
@@ -360,5 +424,12 @@ public class OnePlayer extends ActionBarActivity {
             Log.e("DB_ERROR", e.getMessage());
         }
     }
+    @Override
+    public void onBackPressed() {
+        finish();
+        startActivity(new Intent(this, Quiz.class));
+
+    }
+
 
 }
