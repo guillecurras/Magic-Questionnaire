@@ -87,8 +87,6 @@ public class OnePlayer extends ActionBarActivity {
         answerToDouble.put("YES", 1.0);
         answerToDouble.put("MAYBE", 0.5);
         answerToDouble.put("NO", 0.0);
-
-
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,14 +141,6 @@ public class OnePlayer extends ActionBarActivity {
         botones.add(boton3);
 
     }
-//        try {
-//            new WekaTextfileToXMLTextfile(getAssets().open("treeInText.txt"), getAssets().open("treeInXML.xml"));
-//        }
-//        catch (Exception e)
-//        {
-//
-//        }
-
 
     public void handlerBotones(View view)
     {
@@ -224,64 +214,8 @@ public class OnePlayer extends ActionBarActivity {
         }
     }
 
-    private static ViewGroup getParent(View view) {
-        return (ViewGroup)view.getParent();
-    }
-
-    private static void removeView(View view) {
-        ViewGroup parent = getParent(view);
-        if(parent != null) {
-            parent.removeView(view);
-        }
-    }
-
-    private static void replaceView(View currentView, View newView) {
-        ViewGroup parent = getParent(currentView);
-        if(parent == null) {
-            return;
-        }
-        final int index = parent.indexOfChild(currentView);
-        removeView(currentView);
-        removeView(newView);
-        parent.addView(newView, index);
-    }
-
-    public File obtenerArbol()  // De momento cargo un árbol que hay en la carpeta Assets.
-                                // Habrá que cambiar este método para que llame a weka y calcule el árbol.
+    public File obtenerArbol()
     {
-/*
-        AssetManager assetManager = getAssets();
-        InputStream in = null;
-        OutputStream out = null;
-
-        File wekaTree = null;
-        try {
-            in = assetManager.open("tree.xml");
-            wekaTree = new File(getFilesDir(), "tree2.xml");
-            out = new FileOutputStream(wekaTree);
-            copyFile(in, out);
-        } catch(IOException e) {
-            Log.e("tag", "Failed to copy asset file: " + "tree.txt", e);
-        }
-        finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    // NOOP
-                }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    // NOOP
-                }
-            }
-        }
-
-        return wekaTree;*/
-
         AssetManager assetManager = getAssets();
         OutputStream out = null;
 
@@ -310,67 +244,7 @@ public class OnePlayer extends ActionBarActivity {
 
         Log.d("File", readFromFile(treeTextFile));
 
-        // TODO: Remove
-        // J48 pruned tree
-        // ------------------
-
-        new WekaToXML(treeTextFile, treeXMLFile, true, false).writeXmlFromWekaText();
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeXMLFile), "UTF-8"))) {
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                Log.d("XML", line);
-            }
-        }
-        catch (Exception e) {
-        }
-
         return treeXMLFile;
-      /*  AssetManager assetManager = getAssets();
-        InputStream in = null;
-        OutputStream out = null;
-
-        File treeTextFile = null;
-        try {
-            in = assetManager.open("weatherBonito.txt");
-            treeTextFile = new File(getFilesDir(), "tree.txt");
-            out = new FileOutputStream(treeTextFile);
-            copyFile(in, out);
-        } catch(IOException e) {
-            Log.e("tag", "Failed to copy asset file: " + "tree.txt", e);
-        }
-        finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    // NOOP
-                }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    // NOOP
-                }
-            }
-        }
-
-        File treeXMLFile = new File(getFilesDir(), "tree.xml");
-
-        new WekaToXML(treeTextFile, treeXMLFile, true, false).writeXmlFromWekaText();
-
-//        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeXMLFile), "UTF-8"))) {
-//            String line = null;
-//            while ((line = br.readLine()) != null) {
-//                Log.d("XML", line);
-//            }
-//        }
-//        catch (Exception e) {
-//        }
-
-        return treeXMLFile;*/
-
     }
 
     private String readFromFile(File file) {
@@ -389,9 +263,7 @@ public class OnePlayer extends ActionBarActivity {
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
                     stringBuilder.append(receiveString);
                     stringBuilder.append('\n');
-
                 }
-
                 inputStream.close();
                 ret = stringBuilder.toString();
             }
@@ -428,8 +300,5 @@ public class OnePlayer extends ActionBarActivity {
     public void onBackPressed() {
         finish();
         startActivity(new Intent(this, Quiz.class));
-
     }
-
-
 }
