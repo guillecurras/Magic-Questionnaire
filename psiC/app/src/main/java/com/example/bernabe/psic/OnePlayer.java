@@ -6,12 +6,9 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import org.inra.qualscape.wekatexttoxml.WekaTextfileToXMLTextfile;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
@@ -92,7 +90,6 @@ public class OnePlayer extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.initCache();
-
 
         if (hQuestion != null){
             Enumeration keys = hQuestion.keys();

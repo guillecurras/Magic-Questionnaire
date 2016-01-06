@@ -5,16 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 
 import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
@@ -338,6 +334,11 @@ public class SQLUtil extends PreloadedDatabaseHelper {
 
     }
 
+    /**
+     * Obtain the weka's Instance attributes thought all database questions
+     * @return vWekaAttributes
+     * @throws Exception
+     */
     public ArrayList getWekaAttributes () throws Exception {
         ArrayList vWekaAttributes = new ArrayList();
 
@@ -356,6 +357,11 @@ public class SQLUtil extends PreloadedDatabaseHelper {
         return vWekaAttributes;
     }
 
+    /**
+     * Obtain the weka's Instance class attribute thought all database items
+     * @return
+     * @throws Exception
+     */
     public Attribute getWekaClassAttribute () throws Exception {
         Attribute classAttribute = null;
 
@@ -371,6 +377,11 @@ public class SQLUtil extends PreloadedDatabaseHelper {
         return classAttribute;
     }
 
+    /**
+     * Obtain the Weka Instances object with the answers' relations
+     * @return wekaInstances
+     * @throws Exception
+     */
     public Instances generateWekaInstances () throws Exception {
         Instances wekaInstances = null;
 
@@ -392,7 +403,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
                     Enumeration enumQuestions = hWekaData.keys();
                     while (enumQuestions.hasMoreElements()) {
                         Object key = enumQuestions.nextElement();
-                        if (key instanceof Number) { // Hay que setear los atributos de la instancia previamente. Lo tal seria meterle todas las questions al crear la instancia
+                        if (key instanceof Number) {
                             Attribute attr = new Attribute(key.toString());
                             int wekaAttrIndex = vWekaAttributes.indexOf(attr);
                             if (wekaAttrIndex != -1) {
@@ -418,4 +429,95 @@ public class SQLUtil extends PreloadedDatabaseHelper {
 
         return wekaInstances;
     }
+
+    /**
+     * It obtains the less asked question from the database
+     * @param vExcludedQuestions Vector of questions not included for the query
+     * @return questionId The ID of the less asked question
+     * @throws Exception
+     */
+    public Integer getLessAskedQuestion (Vector vExcludedQuestions) throws Exception{
+        Integer questionId = null;
+
+        boolean existsExcludedQuestions = vExcludedQuestions != null && !vExcludedQuestions.isEmpty();
+
+        String sQuery = "SELECT " + COLUMN_QUESTION_ID + ", MIN(numberOfOcurrences) FROM (SELECT "
+        + COLUMN_QUESTION_ID +", COUNT(" + COLUMN_QUESTION_ID + ") AS numberOfOcurrences FROM answer GROUP BY "  + COLUMN_QUESTION_ID + ")";
+
+        if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
+            this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READONLY);
+
+        // Create the args array with the excluded questions vector
+        String[] sQueryArgs = null;
+        if (existsExcludedQuestions) {
+            // Modify the query by adding the WHERE clause
+            sQueryArgs = this.generateStringArrayFromVector(vExcludedQuestions);
+            if (sQueryArgs != null) {
+                String sQMarks = this.generateQuestionMarkString(sQueryArgs.length);
+                sQuery += " WHERE " + COLUMN_QUESTION_ID + " NOT IN " + sQMarks;
+            } else {
+                existsExcludedQuestions = false;
+            }
+        }
+
+        try {
+            Cursor queryResult = null;
+            if (existsExcludedQuestions)
+                queryResult = this.sqliteDatabase.rawQuery(sQuery, sQueryArgs);
+            else
+                queryResult = this.sqliteDatabase.rawQuery(sQuery, null);
+
+            queryResult.moveToFirst();
+            questionId = queryResult.getInt(queryResult.getColumnIndex(COLUMN_QUESTION_ID));
+        } catch (Exception e){
+            throw new Exception("M_ERROR_GETTING_LESS_ASKED_QUESTION " + e.getMessage());
+        } finally {
+            try {
+                this.sqliteDatabase.close();
+            } catch (Exception e) {
+                throw new Exception("M_ERROR_GETTING_LESS_ASKED_QUESTION " + e.getMessage());
+            }
+        }
+
+        return questionId;
+    }
+
+    /* *** AUX FUNCTIONS *** */
+
+    /**
+     * It generates an String array from a Vector
+     * @param v The source vector
+     * @return sArray
+     */
+    public String[] generateStringArrayFromVector (Vector v) {
+        String[] sArray = null;
+
+        if (v != null && !v.isEmpty()) {
+            sArray = new String[v.size()];
+            for (int i = 0; i< v.size(); i++) {
+                sArray[i] = v.get(i).toString();
+            }
+        }
+
+        return sArray;
+    }
+
+    /**
+     * It returns an array of the type (?,?,?,...,?) with the size required
+     * @param size The number of question marks
+     * @return sResult
+     */
+    public String generateQuestionMarkString (int size) {
+        String sResult = "(";
+
+        for (int i = 0; i< size; i++) {
+            if (i == size - 1)
+                sResult += "?)";
+            else
+                sResult += "?, ";
+        }
+
+        return sResult;
+    }
+
 }
