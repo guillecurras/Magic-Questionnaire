@@ -148,22 +148,13 @@ public class OnePlayer extends ActionBarActivity {
             if (!nextQuestion.startsWith("#")) {
                 String sNewQuestion = hQuestion.get(Integer.parseInt(nextQuestion)).toString();
                 questionTextView.setText(sNewQuestion);
-                if (hQuestion != null && hQuestion.containsKey(actualQuestion))
-                    hAnswer.put(hQuestion.get(actualQuestion), boton.getText());
+                if (hQuestion != null && hQuestion.containsKey(Integer.parseInt(actualQuestion)))
+                    hAnswer.put(Integer.parseInt(actualQuestion), boton.getText());
             } else {
                 questionTextView.setText("Were you thinking of " + hItem.get(Integer.parseInt(nextQuestion.substring(1))) + "?");
-                if (hQuestion != null && hItem != null && hQuestion.containsKey(actualQuestion)
-                        && hItem.containsKey(Integer.parseInt(nextQuestion.substring(1)))) {
-                    hAnswer.put(nextQuestion, boton.getText());
-                    hAnswer.put("item", nextQuestion.substring(1));
+                if (hQuestion != null && hQuestion.containsKey(Integer.parseInt(actualQuestion)))
+                    hAnswer.put(Integer.parseInt(actualQuestion), boton.getText());
 
-                    try {
-                        this.sqlUtil.insertNewWekaData(hAnswer);
-                    } catch (Exception e) {
-                        Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
                 for (Button boton2 : botones) {
                     if (boton2.getText().toString().trim().equals("MAYBE"))
                         boton2.setVisibility(View.GONE);
@@ -176,7 +167,16 @@ public class OnePlayer extends ActionBarActivity {
         {
             if (boton.getText().toString().equals("YES"))
             {
-                // TODO: Meter el resultado en la base de datos
+                if (hItem != null && hItem.containsKey(Integer.parseInt(nextQuestion.substring(1)))) {
+                    hAnswer.put("item", nextQuestion.substring(1));     // Integer o String??
+
+                    try {
+                        this.sqlUtil.insertNewWekaData(hAnswer);
+                    } catch (Exception e) {
+                        Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
             }
             else
             {
@@ -200,8 +200,14 @@ public class OnePlayer extends ActionBarActivity {
                     @Override
                     public void onClick(View v) {
                         String answer = answerText.getText().toString();
+                        hAnswer.put("item", answer);     // Integer o String??
 
-                        // TODO: Añadir la respuesta a la base de datos.
+                        try {
+                            sqlUtil.insertNewWekaData(hAnswer);
+                        } catch (Exception e) {
+                            Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
+                            e.printStackTrace();
+                        }
                     }
                 });
 
