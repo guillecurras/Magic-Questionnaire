@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
@@ -69,7 +70,8 @@ public class OnePlayer extends ActionBarActivity {
 
     public final static String EXTRA_MESSAGE = "com.bernabe.psic.MESSAGE";
 
-    String nextQuestion = "";
+    int nextQuestion = -1;
+    Vector<Integer> alreadyAskedQuestions = new Vector<>();
 
     File tree = null;
     Parser parser = null;
@@ -123,8 +125,8 @@ public class OnePlayer extends ActionBarActivity {
             parser = new Parser(tree);
 
         questionTextView = (TextView) findViewById(R.id.texto_one_2);
-        nextQuestion = parser.getSiguientePregunta(-1);
-        questionTextView.setText(hQuestion.get(Integer.parseInt(nextQuestion)).toString());
+        nextQuestion = Integer.parseInt(parser.getSiguientePregunta(-1));
+        questionTextView.setText(hQuestion.get(nextQuestion).toString());
         questionTextView.setTextSize(40);
         Log.d("CREATE", "Listo-One");
 
@@ -141,34 +143,50 @@ public class OnePlayer extends ActionBarActivity {
     public void handlerBotones(View view)
     {
         Button boton = (Button) view;
-
         if (answerFound == false) {
-            String actualQuestion = nextQuestion;
-            nextQuestion = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
-            if (!nextQuestion.startsWith("#")) {
-                String sNewQuestion = hQuestion.get(Integer.parseInt(nextQuestion)).toString();
-                questionTextView.setText(sNewQuestion);
-                if (hQuestion != null && hQuestion.containsKey(Integer.parseInt(actualQuestion)))
-                    hAnswer.put(Integer.parseInt(actualQuestion), boton.getText());
-            } else {
-                questionTextView.setText("Were you thinking of " + hItem.get(Integer.parseInt(nextQuestion.substring(1))) + "?");
-                if (hQuestion != null && hQuestion.containsKey(Integer.parseInt(actualQuestion)))
-                    hAnswer.put(Integer.parseInt(actualQuestion), boton.getText());
 
-                for (Button boton2 : botones) {
-                    if (boton2.getText().toString().trim().equals("MAYBE"))
-                        boton2.setVisibility(View.GONE);
+            if (hQuestion != null && hQuestion.containsKey(nextQuestion))
+                hAnswer.put(nextQuestion, boton.getText());
+
+            if (Math.random() > 0.5)
+            {
+                String parserResponse = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
+                if (!parserResponse.startsWith("#"))
+                {
+                    nextQuestion = Integer.parseInt(parserResponse);
+                    String sNewQuestion = hQuestion.get(nextQuestion).toString();
+                    questionTextView.setText(sNewQuestion);
                 }
-
-                answerFound = true;
+                else
+                {
+                    nextQuestion = Integer.parseInt(parserResponse.substring(1));
+                    answerFound = true;
+                    questionTextView.setText("Were you thinking of " + hItem.get(nextQuestion) + "?");
+                    for (Button boton2 : botones) {
+                        if (boton2.getText().toString().trim().equals("MAYBE"))
+                            boton2.setVisibility(View.GONE);
+                    }
+                }
+            }
+            else
+            {
+                try {
+                    nextQuestion = sqlUtil.getLessAskedQuestion(alreadyAskedQuestions);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                String sNewQuestion = hQuestion.get(nextQuestion).toString();
+                questionTextView.setText(sNewQuestion);
+                alreadyAskedQuestions.add(nextQuestion);
             }
         }
         else            // We have a guess
         {
             if (boton.getText().toString().equals("YES"))
             {
-                if (hItem != null && hItem.containsKey(Integer.parseInt(nextQuestion.substring(1)))) {
-                    hAnswer.put("item", nextQuestion.substring(1));     // Integer o String??
+                if (hItem != null && hItem.containsKey(nextQuestion)) {
+                    hAnswer.put("item", nextQuestion);     // Integer o String??
 
                     try {
                         this.sqlUtil.insertNewWekaData(hAnswer);
@@ -243,6 +261,9 @@ public class OnePlayer extends ActionBarActivity {
         }
 
         File treeXMLFile = new File(getFilesDir(), "tree.xml");
+
+        new WekaToXML(treeTextFile, treeXMLFile, true, false).writeXmlFromWekaText();
+
 
         Log.d("File", readFromFile(treeTextFile));
 
