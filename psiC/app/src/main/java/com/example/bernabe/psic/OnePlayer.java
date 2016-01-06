@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import weka.classifiers.trees.J48;
 import weka.core.Instances;

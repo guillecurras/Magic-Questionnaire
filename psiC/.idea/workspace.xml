@@ -10,9 +10,8 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="23c2cde6-4c62-4dca-b9ca-68254147227c" name="Default" comment="Creado la función">
+    <list default="true" id="23c2cde6-4c62-4dca-b9ca-68254147227c" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/SQLUtil.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/SQLUtil.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="psiC.iws" />
@@ -43,25 +42,25 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="OnePlayer.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="OnePlayer.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.2142856">
-              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.6">
+              <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
               <folding>
-                <element signature="e#1896#1904#0" expanded="true" />
-                <element signature="e#1987#2003#0" expanded="true" />
-                <element signature="e#6596#6891#0" expanded="true" />
-                <element signature="e#6890#6891#0" expanded="true" />
+                <element signature="e#1871#1879#0" expanded="true" />
+                <element signature="e#1962#1978#0" expanded="true" />
+                <element signature="e#6571#6866#0" expanded="true" />
+                <element signature="e#6865#6866#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SQLUtil.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SQLUtil.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/SQLUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.156">
+            <state vertical-scroll-proportion="-221.25">
               <caret line="438" column="39" selection-start-line="438" selection-start-column="19" selection-end-line="438" selection-end-column="39" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -1538,8 +1537,8 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/AnswerDataSource.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/DataBaseHelper.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/PreloadedDatabaseHelper.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/SQLUtil.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java" />
       </list>
     </option>
   </component>
@@ -2221,7 +2220,13 @@
       <option name="project" value="LOCAL" />
       <updated>1451772244398</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Creado la función getLessAskedQuestion">
+      <created>1452085067412</created>
+      <option name="number" value="00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1452085067412</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -2313,14 +2318,15 @@
     <MESSAGE value="Corregido copyDatabase" />
     <MESSAGE value="Modificacion leve OnePlayer" />
     <MESSAGE value="Creado el arbol utilizando Instances" />
-    <option name="LAST_COMMIT_MESSAGE" value="Creado el arbol utilizando Instances" />
+    <MESSAGE value="Creado la función getLessAskedQuestion" />
+    <option name="LAST_COMMIT_MESSAGE" value="Creado la función getLessAskedQuestion" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java</url>
-          <line>110</line>
+          <line>109</line>
           <properties />
           <option name="timeStamp" value="55" />
         </line-breakpoint>
@@ -2372,10 +2378,10 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="84" column="17" selection-start-line="84" selection-start-column="17" selection-end-line="84" selection-end-column="17" />
           <folding>
-            <element signature="e#1896#1904#0" expanded="true" />
-            <element signature="e#1987#2003#0" expanded="true" />
-            <element signature="e#6596#6891#0" expanded="true" />
-            <element signature="e#6890#6891#0" expanded="true" />
+            <element signature="e#1871#1879#0" expanded="true" />
+            <element signature="e#1962#1978#0" expanded="true" />
+            <element signature="e#6571#6866#0" expanded="true" />
+            <element signature="e#6865#6866#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2431,10 +2437,10 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="5" selection-start-line="74" selection-start-column="5" selection-end-line="74" selection-end-column="5" />
           <folding>
-            <element signature="e#1896#1904#0" expanded="true" />
-            <element signature="e#1987#2003#0" expanded="true" />
-            <element signature="e#6596#6891#0" expanded="true" />
-            <element signature="e#6890#6891#0" expanded="true" />
+            <element signature="e#1871#1879#0" expanded="true" />
+            <element signature="e#1962#1978#0" expanded="true" />
+            <element signature="e#6571#6866#0" expanded="true" />
+            <element signature="e#6865#6866#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2507,10 +2513,10 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#1896#1904#0" expanded="true" />
-            <element signature="e#1987#2003#0" expanded="true" />
-            <element signature="e#6596#6891#0" expanded="true" />
-            <element signature="e#6890#6891#0" expanded="true" />
+            <element signature="e#1871#1879#0" expanded="true" />
+            <element signature="e#1962#1978#0" expanded="true" />
+            <element signature="e#6571#6866#0" expanded="true" />
+            <element signature="e#6865#6866#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2753,26 +2759,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.2142856">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding>
-            <element signature="e#1896#1904#0" expanded="true" />
-            <element signature="e#1987#2003#0" expanded="true" />
-            <element signature="e#6596#6891#0" expanded="true" />
-            <element signature="e#6890#6891#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/SQLUtil.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.156">
+        <state vertical-scroll-proportion="-221.25">
           <caret line="438" column="39" selection-start-line="438" selection-start-column="19" selection-end-line="438" selection-end-column="39" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#getAllQuestion#0;class#SQLUtil#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/bernabe/psic/OnePlayer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6">
+          <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+          <folding>
+            <element signature="e#1871#1879#0" expanded="true" />
+            <element signature="e#1962#1978#0" expanded="true" />
+            <element signature="e#6571#6866#0" expanded="true" />
+            <element signature="e#6865#6866#0" expanded="true" />
           </folding>
         </state>
       </provider>
