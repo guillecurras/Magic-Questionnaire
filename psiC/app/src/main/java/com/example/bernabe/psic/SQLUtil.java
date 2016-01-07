@@ -306,7 +306,10 @@ public class SQLUtil extends PreloadedDatabaseHelper {
                 Enumeration dataKeys = hWekaData.keys();
                 ContentValues cValuesInsert;
                 while (dataKeys.hasMoreElements()) { // Insert a new row in answer table for each answer in table
-                    int questionId = (int) dataKeys.nextElement();
+                    Object nextElement = dataKeys.nextElement();
+                    if (nextElement instanceof String)
+                        break;
+                    int questionId = (int) nextElement;
                     String sAnswerDescription = (String) hWekaData.get(questionId);
                     cValuesInsert = new ContentValues();
                     cValuesInsert.put(COLUMN_ROUND_NUMBER, newRoundNumber);
@@ -317,9 +320,6 @@ public class SQLUtil extends PreloadedDatabaseHelper {
                 }
                 this.sqliteDatabase.setTransactionSuccessful();
                 this.sqliteDatabase.endTransaction();
-            } catch (Exception e) {
-                this.sqliteDatabase.endTransaction();
-                throw new Exception("M_ERROR_INSERTING_WEKA_DATA_IN_DATABASE " + e.getMessage());
             } finally {
                 try {
                     this.sqliteDatabase.close();
