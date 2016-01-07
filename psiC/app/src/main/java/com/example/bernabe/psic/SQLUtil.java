@@ -282,6 +282,26 @@ public class SQLUtil extends PreloadedDatabaseHelper {
         return hItem;
     }
 
+    public int insertNewItem(String itemName){
+        try {
+            if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()) {
+                this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
+            } else if (this.sqliteDatabase.isReadOnly()) {
+                this.sqliteDatabase.close();
+                this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        ContentValues cValuesInsert = new ContentValues();
+        cValuesInsert.put(COLUMN_ITEM, itemName);
+
+        return (int) this.sqliteDatabase.insert(TABLE_ITEM, null, cValuesInsert);
+
+
+    }
+
     /**
      * Giving a table with query-answer-item data, it's insert in answer table a row for each answer in the table with a new generated roundNumber
      * @param hWekaData A table with the shape questionId1=answerDescription1, ..., "item"=itemId

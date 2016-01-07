@@ -236,15 +236,17 @@ public class OnePlayer extends ActionBarActivity {
                     @Override
                     public void onClick(View v) {
                         String answer = answerText.getText().toString();
-                        hAnswer.put("item", answer);     // Integer o String??
+                        int itemID = sqlUtil.insertNewItem(answer);
+                        hAnswer.put("item", itemID);     // Integer o String??
 
                         try {
                             sqlUtil.insertNewWekaData(hAnswer);
                         } catch (Exception e) {
                             Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
                             e.printStackTrace();
-                            finishGame();
                         }
+                            finishGame();
+
                     }
                 });
             }
