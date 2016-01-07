@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import weka.classifiers.trees.J48;
@@ -236,7 +237,20 @@ public class OnePlayer extends ActionBarActivity {
                     @Override
                     public void onClick(View v) {
                         String answer = answerText.getText().toString();
-                        int itemID = sqlUtil.insertNewItem(answer);
+                        int itemID = -1;
+                        answer = answer.substring(0, 1).toUpperCase() + answer.substring(1);
+                        boolean itemAlreadyExists = false;
+
+                        for (Map.Entry<Integer, String> entry : hItem.entrySet())
+                        {
+                            if (entry.getValue().toLowerCase().equals(answer.toLowerCase()))
+                            {
+                                itemID = entry.getKey();
+                                itemAlreadyExists = true;
+                            }
+                        }
+                        if (itemAlreadyExists == false)
+                            itemID = sqlUtil.insertNewItem(answer);
                         hAnswer.put("item", itemID);     // Integer o String??
 
                         try {
