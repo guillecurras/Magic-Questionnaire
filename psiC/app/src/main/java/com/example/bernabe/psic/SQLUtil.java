@@ -255,8 +255,8 @@ public class SQLUtil extends PreloadedDatabaseHelper {
      * @throws Exception
      */
 
-    public Hashtable getAllItem () throws Exception {
-        Hashtable hItem = new Hashtable();
+    public Hashtable <Integer, String> getAllItem () throws Exception {
+        Hashtable <Integer, String> hItem = new Hashtable<>();
 
         String sQueryAllItem = "SELECT * FROM " + TABLE_ITEM;
 
@@ -331,7 +331,6 @@ public class SQLUtil extends PreloadedDatabaseHelper {
         } else {
             throw new Exception("M_ERROR_INSERTING_WEKA_DATA_IN_DATABASE");
         }
-
     }
 
     /**

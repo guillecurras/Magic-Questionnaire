@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,7 +51,7 @@ public class OnePlayer extends ActionBarActivity {
     /**
      * @variable hItem All item cache
      */
-    private Hashtable hItem;
+    private Hashtable <Integer, String> hItem;
 
     /**
      * @variable roundNumber The round number of the actual game
@@ -72,6 +74,9 @@ public class OnePlayer extends ActionBarActivity {
 
     int nextQuestion = -1;
     Vector<Integer> alreadyAskedQuestions = new Vector<>();
+    boolean lastQuestionWasRandom = false;
+    String parserResponse = "";
+
 
     File tree = null;
     Parser parser = null;
@@ -148,9 +153,13 @@ public class OnePlayer extends ActionBarActivity {
             if (hQuestion != null && hQuestion.containsKey(nextQuestion))
                 hAnswer.put(nextQuestion, boton.getText());
 
+
+            if (!lastQuestionWasRandom)
+                parserResponse = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
+
+
             if (Math.random() > 0.5)
             {
-                String parserResponse = parser.getSiguientePregunta(answerToDouble.get(boton.getText().toString()));
                 if (!parserResponse.startsWith("#"))
                 {
                     nextQuestion = Integer.parseInt(parserResponse);
@@ -167,6 +176,7 @@ public class OnePlayer extends ActionBarActivity {
                             boton2.setVisibility(View.GONE);
                     }
                 }
+                lastQuestionWasRandom = false;
             }
             else
             {
@@ -179,6 +189,7 @@ public class OnePlayer extends ActionBarActivity {
                 String sNewQuestion = hQuestion.get(nextQuestion).toString();
                 questionTextView.setText(sNewQuestion);
                 alreadyAskedQuestions.add(nextQuestion);
+                lastQuestionWasRandom = true;
             }
         }
         else            // We have a guess
@@ -195,6 +206,7 @@ public class OnePlayer extends ActionBarActivity {
                         e.printStackTrace();
                     }
                 }
+                finishGame();
             }
             else
             {
@@ -204,14 +216,20 @@ public class OnePlayer extends ActionBarActivity {
                 }
 
                 Button sendButton = (Button) findViewById(R.id.boton_send);
-                final EditText answerText = (EditText) findViewById(R.id.edittext_answer);
+                final AutoCompleteTextView answerText = (AutoCompleteTextView) findViewById(R.id.edittext_answer);
 
                 for (Button boton2 : botones) {
                     boton2.setVisibility(View.GONE);
                 }
+                botones.add(sendButton);
 
                 questionTextView.setText("What were you thinking of?");
                 sendButton.setVisibility(View.VISIBLE);
+
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_dropdown_item_1line, hItem.values().toArray(new String[hItem.size()]));
+
+                answerText.setAdapter(arrayAdapter);
+                answerText.setThreshold(1);
                 answerText.setVisibility(View.VISIBLE);
 
                 sendButton.setOnClickListener(new View.OnClickListener() {
@@ -225,13 +243,31 @@ public class OnePlayer extends ActionBarActivity {
                         } catch (Exception e) {
                             Log.e("ERROR_INSERT_ROUND_DATA", e.getMessage());
                             e.printStackTrace();
+                            finishGame();
                         }
                     }
                 });
-
-
             }
         }
+    }
+
+    private void finishGame() {
+        for (Button boton : botones)
+            boton.setVisibility(View.GONE);
+        findViewById(R.id.edittext_answer).setVisibility(View.GONE);
+
+        questionTextView.setText("Grasias por jugar");
+        Button finishButton = (Button) findViewById(R.id.boton_finish);
+        finishButton.setVisibility(View.VISIBLE);
+        finishButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                startActivity(new Intent(OnePlayer.this, Quiz.class));
+
+            }
+        });
+
     }
 
     public File obtenerArbol()
