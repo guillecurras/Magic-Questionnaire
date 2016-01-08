@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -102,6 +103,8 @@ public class SQLUtil extends PreloadedDatabaseHelper {
                 + TABLE_QUESTION + "." + ANDROID_PREDEFINED_ID + " = roundAnswers." + COLUMN_QUESTION_ID + " LEFT OUTER JOIN "
                 + TABLE_ITEM + " ON roundAnswers." + COLUMN_ITEM_ID + " = " + TABLE_ITEM + "." + ANDROID_PREDEFINED_ID;
 
+        Log.d("query", answersQuery);
+
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen()){
             this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READWRITE);
         } else if (this.sqliteDatabase.isReadOnly()) {
@@ -118,7 +121,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
                 String newAnswer;
                 int questionId;
                 queryResult.moveToPosition(i);
-                if (newItem == null) // Obtain the item found in that round
+                if (newItem == null && queryResult.getString(queryResult.getColumnIndex(COLUMN_ITEM_ID)) != null) // Obtain the item found in that round
                     newItem = queryResult.getInt(queryResult.getColumnIndex(COLUMN_ITEM_ID));
                 if (queryResult.getString(queryResult.getColumnIndex(COLUMN_ANSWER_DESCRIPTION)) != null &&
                         queryResult.getString(queryResult.getColumnIndex(COLUMN_QUESTION_ID)) != null) {
@@ -189,7 +192,7 @@ public class SQLUtil extends PreloadedDatabaseHelper {
 
         // Query used to obtain the maximum roundNumber stored in DB
         String sQueryMaxRound = "SELECT MAX(" + COLUMN_ROUND_NUMBER + ") AS " + COLUMN_ROUND_NUMBER
-                + " FROM " + TABLE_ANSWER + " GROUP BY "  + COLUMN_ROUND_NUMBER;
+                + " FROM " + TABLE_ANSWER;
 
         if (this.sqliteDatabase == null || !this.sqliteDatabase.isOpen())
             this.sqliteDatabase = this.openSQLiteDatabase((this.DB_PATH) + (this.DB_NAME), SQLiteDatabase.OPEN_READONLY);

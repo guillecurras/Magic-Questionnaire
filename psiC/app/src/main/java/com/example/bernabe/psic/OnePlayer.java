@@ -201,7 +201,7 @@ public class OnePlayer extends ActionBarActivity {
                     e.printStackTrace();
                 }
                 String sNewQuestion = hQuestion.get(nextQuestion).toString();
-                questionTextView.setText(sNewQuestion);
+                questionTextView.setText("+" + sNewQuestion);
                 alreadyAskedQuestions.add(nextQuestion);
                 lastQuestionWasRandom = true;
             }
