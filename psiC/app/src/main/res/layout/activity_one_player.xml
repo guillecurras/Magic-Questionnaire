@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:text="YES"
         android:id="@+id/boton_yes"
-        android:layout_below="@+id/texto_one_2"
+        android:layout_above="@+id/boton_not"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:text="NO"
         android:id="@+id/boton_not"
-        android:layout_below="@+id/boton_yes"
+        android:layout_above="@+id/boton_maybe"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
@@ -55,11 +55,11 @@
         android:layout_height="wrap_content"
         android:text="MAYBE"
         android:id="@+id/boton_maybe"
-        android:layout_below="@+id/boton_not"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
         android:onClick="handlerBotones"
+        android:layout_alignParentBottom="true"
         />
 
     <Button
@@ -67,19 +67,19 @@
         android:layout_height="wrap_content"
         android:text="SEND"
         android:id="@+id/boton_send"
-        android:layout_below="@+id/edittext_answer"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
         android:onClick="handlerBotones"
         android:visibility="invisible"
+        android:layout_alignParentBottom="true"
         />
 
     <AutoCompleteTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/edittext_answer"
-        android:layout_below="@+id/texto_one_2"
+        android:layout_above="@+id/boton_send"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
@@ -98,6 +98,7 @@
         android:layout_marginTop="40dp"
         android:onClick="handlerBotones"
         android:visibility="invisible"
+        android:layout_alignParentBottom="true"
         />
 
     <!--<Button-->

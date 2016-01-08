@@ -186,7 +186,7 @@ public class OnePlayer extends ActionBarActivity {
                     questionTextView.setText("Were you thinking of " + hItem.get(nextQuestion) + "?");
                     for (Button boton2 : botones) {
                         if (boton2.getText().toString().trim().equals("MAYBE"))
-                            boton2.setVisibility(View.GONE);
+                            boton2.setVisibility(View.INVISIBLE);
                     }
                 }
                 alreadyAskedQuestions.add(nextQuestion);
@@ -226,14 +226,14 @@ public class OnePlayer extends ActionBarActivity {
             {
                 for (Button boton2 : botones) {
                     if (boton2.getText().toString().trim().equals("MAYBE"))
-                        boton2.setVisibility(View.GONE);
+                        boton2.setVisibility(View.INVISIBLE);
                 }
 
                 Button sendButton = (Button) findViewById(R.id.boton_send);
                 final AutoCompleteTextView answerText = (AutoCompleteTextView) findViewById(R.id.edittext_answer);
 
                 for (Button boton2 : botones) {
-                    boton2.setVisibility(View.GONE);
+                    boton2.setVisibility(View.INVISIBLE);
                 }
                 botones.add(sendButton);
 
@@ -282,10 +282,10 @@ public class OnePlayer extends ActionBarActivity {
 
     private void finishGame() {
         for (Button boton : botones)
-            boton.setVisibility(View.GONE);
-        findViewById(R.id.edittext_answer).setVisibility(View.GONE);
+            boton.setVisibility(View.INVISIBLE);
+        findViewById(R.id.edittext_answer).setVisibility(View.INVISIBLE);
 
-        questionTextView.setText("Grasias por jugar");
+        questionTextView.setText("Gracias por jugar");
         Button finishButton = (Button) findViewById(R.id.boton_finish);
         finishButton.setVisibility(View.VISIBLE);
         finishButton.setOnClickListener(new View.OnClickListener() {
