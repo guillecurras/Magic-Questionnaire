@@ -164,8 +164,20 @@ public class OnePlayer extends ActionBarActivity {
                 if (!parserResponse.startsWith("#"))
                 {
                     nextQuestion = Integer.parseInt(parserResponse);
-                    String sNewQuestion = hQuestion.get(nextQuestion).toString();
-                    questionTextView.setText(sNewQuestion);
+                    if (!hAnswer.containsKey(nextQuestion))
+                    {
+                        String sNewQuestion = hQuestion.get(nextQuestion).toString();
+                        questionTextView.setText(sNewQuestion);
+                    }
+                    else        // If we've already made this question.
+                    {
+                        if (hAnswer.get(nextQuestion).equals("YES"))
+                            botones.get(0).performClick();
+                        else if (hAnswer.get(nextQuestion).equals("NO"))
+                            botones.get(1).performClick();
+                        else if (hAnswer.get(nextQuestion).equals("MAYBE"))
+                            botones.get(2).performClick();
+                    }
                 }
                 else
                 {
@@ -177,6 +189,7 @@ public class OnePlayer extends ActionBarActivity {
                             boton2.setVisibility(View.GONE);
                     }
                 }
+                alreadyAskedQuestions.add(nextQuestion);
                 lastQuestionWasRandom = false;
             }
             else
