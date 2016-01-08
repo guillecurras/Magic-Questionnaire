@@ -27,16 +27,6 @@ public class Quiz extends ActionBarActivity {
         Log.d("CREATION", "Start One - 1");
     }
 
-    public void twoPlayer(View view) {
-        Log.d("CREATION", "Start two");
-        Intent intent2 = new Intent(this,TwoPlayer.class);
-        String message = "Segunda pregunta";
-        intent2.putExtra(EXTRA_MESSAGE, message);
-        Log.d("CREATION", "Start two - 2");
-        startActivity(intent2);
-        Log.d("CREATION", "Start two - 1");
-    }
-
     public void help(View view) {
         Log.d("CREATION", "Help");
         Intent intent3 = new Intent(this,Help.class);

@@ -112,7 +112,7 @@ public class OnePlayer extends ActionBarActivity {
             Instances wekaInput = sqlUtil.generateWekaInstances();
             Log.d("Instances", wekaInput.toString().replace("\n\n", "\n"));
             treeClassifier = new J48();
-            String[] options = weka.core.Utils.splitOptions("-M 1");
+            String[] options = weka.core.Utils.splitOptions("-U -M 1");
             treeClassifier.setOptions(options);
             treeClassifier.buildClassifier(wekaInput);
 

@@ -10,19 +10,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/texto_one"
-        android:text="One Player"
-        android:textSize="40dp"
-        android:gravity="center"
-        android:background="#bcbaba"
-    />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Pregunta numero uno"
         android:id="@+id/texto_one_2"
-        android:layout_below="@id/texto_one"
         android:textSize="20dp"
         android:gravity="center"
         android:layout_marginTop="20dp"
@@ -92,7 +81,6 @@
         android:layout_height="wrap_content"
         android:text="FINISH"
         android:id="@+id/boton_finish"
-        android:layout_below="@+id/texto_one_2"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="40dp"
